@@ -109,7 +109,51 @@ blockquote { margin: 0; border-left: 4px solid var(--line); padding: 4px 0 4px 1
 .result td { padding: 8px 4px; border-top: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
 .result td.n { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--zabuton); font-weight: 700; text-align: right; }
 .result .q { color: var(--muted); font-size: 0.8rem; display: block; }
-@media (prefers-reduced-motion: reduce) { .zb.new { animation: none; } }
+/* ---------- アニメーション ---------- */
+.top { animation: rise .5s ease-out both; }
+.fuda { animation: fudaIn .6s cubic-bezier(.2,1.2,.4,1) .1s both; transform-origin: 50% 0; }
+.fuda.flip { animation: flip .45s ease-in-out both; }
+.pilebox { animation: rise .5s ease-out .25s both; }
+.answer, #nav { animation: rise .45s ease-out both; }
+.btn { transition: transform .12s ease, filter .15s ease, box-shadow .15s ease; }
+.btn:not(:disabled):hover { transform: translateY(-1px); }
+.btn:not(:disabled):active { transform: scale(.95); }
+textarea { transition: border-color .2s ease, box-shadow .2s ease; }
+textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(in srgb, var(--zabuton) 18%, transparent); outline: none; }
+.mine.anim { animation: popIn .35s cubic-bezier(.2,1.3,.4,1) both; transform-origin: 100% 50%; }
+.thinking { display: flex; align-items: center; gap: 10px; color: var(--muted); animation: rise .3s ease-out both; }
+.thinking i { width: 8px; height: 8px; border-radius: 50%; background: var(--zabuton); animation: hop .9s ease-in-out infinite; }
+.thinking i:nth-child(2) { animation-delay: .15s; } .thinking i:nth-child(3) { animation-delay: .3s; }
+.judge.anim > * { animation: rise .45s ease-out both; animation-delay: var(--d, 0s); }
+.judge.anim .stamp { animation: slam .5s cubic-bezier(.3,1.5,.5,1) .25s both; }
+.judge.anim .dots i.on { animation: dotOn .3s cubic-bezier(.3,1.6,.5,1) both; animation-delay: var(--d, 0s); }
+.judge.anim .points li { animation: rise .4s ease-out both; animation-delay: var(--d, 0s); }
+.verdict { position: relative; }
+.burst { position: absolute; left: 50px; top: 50%; width: 0; height: 0; pointer-events: none; }
+.burst i { position: absolute; width: 8px; height: 8px; border-radius: 2px; background: var(--c); animation: burst .9s cubic-bezier(.1,.8,.3,1) .55s both; }
+.judge.anim .verdict.shake { animation: shake .45s ease-in-out .55s both; }
+.pop { display: inline-block; animation: rankPop .6s cubic-bezier(.3,1.6,.5,1) both; }
+.result:not([hidden]) { animation: fudaIn .6s cubic-bezier(.2,1.2,.4,1) both; }
+.result h2 { animation: zoomIn .7s cubic-bezier(.2,1.4,.4,1) .2s both; }
+.result tr { animation: rise .4s ease-out both; animation-delay: var(--d, 0s); }
+.rain { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 20; }
+.rain i { position: absolute; top: -30px; width: 46px; height: 10px; border-radius: 5px; background: linear-gradient(var(--zabuton), var(--zabuton-edge)); animation: fall var(--t, 2.4s) cubic-bezier(.4,.1,.6,1) var(--d, 0s) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes fudaIn { from { opacity: 0; transform: translateY(-28px) rotate(-3deg); } to { opacity: 1; transform: none; } }
+@keyframes flip { 0% { transform: rotateX(0); } 50% { transform: rotateX(90deg); } 100% { transform: rotateX(0); } }
+@keyframes popIn { from { opacity: 0; transform: scale(.85) translateX(16px); } to { opacity: 1; transform: none; } }
+@keyframes hop { 0%, 100% { transform: translateY(0); opacity: .4; } 50% { transform: translateY(-6px); opacity: 1; } }
+@keyframes slam { 0% { opacity: 0; transform: scale(2.6) rotate(-16deg); } 60% { opacity: 1; transform: scale(.9) rotate(-3deg); } 100% { opacity: 1; transform: rotate(-4deg); } }
+@keyframes dotOn { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes burst { from { transform: translate(0, 0) rotate(0); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; } }
+@keyframes shake { 0%, 100% { transform: none; } 20% { transform: translateX(-6px) rotate(-.5deg); } 40% { transform: translateX(5px) rotate(.5deg); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+@keyframes rankPop { 0% { transform: scale(1); } 40% { transform: scale(1.4); } 100% { transform: scale(1); } }
+@keyframes zoomIn { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+@keyframes fall { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 100% { transform: translate(var(--dx, 0), 110vh) rotate(var(--r, 180deg)); opacity: .9; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .rain, .burst { display: none; }
+}
 </style>
 
 <div class="wrap">
@@ -254,14 +298,15 @@ blockquote { margin: 0; border-left: 4px solid var(--line); padding: 4px 0 4px 1
     const hikimodoshi = !!odai.f && (life.length > 0 || place.length > 0);
     // 重ねる:小さいボケや言葉を重ねる(「〜し、〜も」、3つ以上の列挙)
     const kasane = /し、/.test(raw) || raw.split(/[、,]/).length >= 4 || /[、,].{1,12}も[^のう]/.test(raw);
-    // 省略:短く言い切って余白を残す
-    const tanteki = len <= 12 && cliche.length === 0;
 
     // ギャップ:お題がプラスならマイナスの出来事、マイナスならプラスの出来事
     let gap = 0;
     if (odai.p === "+" && neg.length) gap = 2;
     else if (odai.p === "-" && pos.length) gap = 2;
     else if (odai.p === "0" && (pos.length || neg.length)) gap = 1;
+
+    // 省略:短く言い切って余白を残す(中身のある短文だけ)
+    const tanteki = len <= 12 && cliche.length === 0 && (life.length + place.length + pos.length + neg.length > 0 || !!num || quote || gap > 0);
 
     // 被り:前の回答と同じ要素を使い回していないか
     const cur = tokens(t);
@@ -368,6 +413,39 @@ blockquote { margin: 0; border-left: 4px solid var(--line); padding: 4px 0 4px 1
   const allIdx = () => shuffle(ODAI.map((_, i) => i));
   const fresh = () => { const deck = allIdx(); return { deck, q: 1, cur: deck.shift(), tries: [], rounds: [], phase: "answer" }; };
   let st;
+  let busy = false;
+  const REDUCED = (() => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } })();
+  const wait = (ms) => new Promise((r) => setTimeout(r, REDUCED ? 0 : ms));
+  function restart(node, cls) { node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls); }
+  function countUp(node, from, to, delay) {
+    if (REDUCED || from === to) { node.textContent = to; return; }
+    setTimeout(() => {
+      const t0 = performance.now(), dur = 500;
+      const step = (now) => { const k = Math.min(1, (now - t0) / dur); node.textContent = Math.round(from + (to - from) * k); if (k < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    }, delay);
+  }
+  function burst(host, n) {
+    if (REDUCED) return;
+    const b = el("span", "burst");
+    for (let i = 0; i < n; i++) {
+      const a = (Math.PI * 2 * i) / n + Math.random() * 0.4, r = 50 + Math.random() * 60;
+      const p = el("i"); p.style.setProperty("--dx", Math.cos(a) * r + "px"); p.style.setProperty("--dy", Math.sin(a) * r + "px");
+      p.style.setProperty("--r", Math.round(Math.random() * 360) + "deg"); p.style.setProperty("--c", i % 3 ? "var(--zabuton)" : "var(--tassel)");
+      b.appendChild(p);
+    }
+    host.appendChild(b); setTimeout(() => b.remove(), 1800);
+  }
+  function rain(n) {
+    if (REDUCED || n <= 0) return;
+    const r = el("div", "rain");
+    for (let i = 0; i < Math.min(n * 4, 60); i++) {
+      const z = el("i"); z.style.left = Math.random() * 100 + "%"; z.style.setProperty("--d", (Math.random() * 1.6).toFixed(2) + "s");
+      z.style.setProperty("--t", (1.8 + Math.random() * 1.4).toFixed(2) + "s"); z.style.setProperty("--dx", (Math.random() * 120 - 60) + "px"); z.style.setProperty("--r", (Math.random() * 540 - 270) + "deg");
+      r.appendChild(z);
+    }
+    document.body.appendChild(r); setTimeout(() => r.remove(), 5000);
+  }
 
   function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch {} }
@@ -380,36 +458,44 @@ blockquote { margin: 0; border-left: 4px solid var(--line); padding: 4px 0 4px 1
   const rankOf = (n) => RANKS.find(([min]) => n >= min)[1];
   const drawNext = () => { if (!st.deck.length) st.deck = allIdx(); return st.deck.shift(); };
 
-  function renderPile(from) {
+  function renderPile(from, delay = 0) {
     const pile = $("pile"); pile.textContent = "";
     const n = total();
-    for (let i = 0; i < n; i++) { const isNew = from != null && i >= from; const z = el("div", "zb" + (isNew ? " new" : "")); if (isNew) z.style.animationDelay = (i - from) * 0.15 + "s"; pile.appendChild(z); }
-    $("total").textContent = n; $("rank").textContent = rankOf(n);
+    for (let i = 0; i < n; i++) { const isNew = from != null && i >= from; const z = el("div", "zb" + (isNew ? " new" : "")); if (isNew) z.style.animationDelay = delay + (i - from) * 0.15 + "s"; pile.appendChild(z); }
+    const prevRank = $("rank").textContent;
+    if (from != null && n !== from) countUp($("total"), from, n, delay * 1000); else $("total").textContent = n;
+    $("rank").textContent = rankOf(n);
+    if (from != null && prevRank !== rankOf(n)) setTimeout(() => restart($("rank"), "pop"), delay * 1000 + 300);
   }
 
-  function renderTry(t, last) {
+  function renderTry(t, last, anim) {
     const f = document.createDocumentFragment();
     f.appendChild(el("div", "mine", t.answer));
-    const g = t.result, j = el("div", "judge");
+    const g = t.result, j = el("div", "judge" + (anim ? " anim" : ""));
     j.appendChild(el("div", "reaction", g.reaction));
     const v = el("div", "verdict"); v.appendChild(el("span", "stamp", VERDICT[g.zabuton]));
     const m = el("div", "meters");
-    ["発想", "情景", "構成"].forEach((k, i) => { const mm = el("span", "meter"); mm.appendChild(el("span", null, k)); const d = el("span", "dots"); for (let n = 1; n <= 5; n++) d.appendChild(el("i", n <= g.scores[i] ? "on" : "")); mm.appendChild(d); m.appendChild(mm); });
+    ["発想", "情景", "構成"].forEach((k, i) => { const mm = el("span", "meter"); mm.appendChild(el("span", null, k)); const d = el("span", "dots"); for (let n = 1; n <= 5; n++) { const dot = el("i", n <= g.scores[i] ? "on" : ""); dot.style.setProperty("--d", (0.6 + i * 0.25 + n * 0.07).toFixed(2) + "s"); d.appendChild(dot); } mm.appendChild(d); m.appendChild(mm); });
     v.appendChild(m); j.appendChild(v);
-    j.appendChild(el("h3", null, "講評"));
-    const ul = el("ul", "points");
-    g.points.forEach(([k, text]) => { const li = el("li"); li.appendChild(el("b", null, k + ":")); li.appendChild(document.createTextNode(text)); ul.appendChild(li); });
+    const h = el("h3", null, "講評"); h.style.setProperty("--d", "1.3s"); j.appendChild(h);
+    const ul = el("ul", "points"); ul.style.setProperty("--d", "1.3s");
+    g.points.forEach(([k, text], i) => { const li = el("li"); li.style.setProperty("--d", (1.4 + i * 0.18).toFixed(2) + "s"); li.appendChild(el("b", null, k + ":")); li.appendChild(document.createTextNode(text)); ul.appendChild(li); });
     j.appendChild(ul);
-    if (last && t.showSample) { j.appendChild(el("div", null, "ちなみに師匠ならこう答える。")); j.appendChild(el("blockquote", null, g.sample)); }
+    if (last && t.showSample) {
+      const sd = (1.5 + g.points.length * 0.18).toFixed(2) + "s";
+      const a = el("div", null, "ちなみに師匠ならこう答える。"); a.style.setProperty("--d", sd); j.appendChild(a);
+      const q = el("blockquote", null, g.sample); q.style.setProperty("--d", sd); j.appendChild(q);
+    }
+    if (anim && g.zabuton === 3) { burst(v, 18); v.classList.add("shake"); }
     f.appendChild(j);
     return f;
   }
 
-  function render() {
+  function render(animLast) {
     $("odai").textContent = odai().q;
     $("qnum").textContent = Math.min(st.q, ROUNDS);
     const th = $("thread"); th.textContent = "";
-    st.tries.forEach((t, i) => { if (i) th.appendChild(el("hr", "sep")); th.appendChild(renderTry(t, i === st.tries.length - 1)); });
+    st.tries.forEach((t, i) => { if (i) th.appendChild(el("hr", "sep")); th.appendChild(renderTry(t, i === st.tries.length - 1, animLast && i === st.tries.length - 1)); });
     const done = st.phase === "done";
     $("form").hidden = done || st.phase === "judged";
     $("nav").hidden = done || st.phase !== "judged";
@@ -419,23 +505,40 @@ blockquote { margin: 0; border-left: 4px solid var(--line); padding: 4px 0 4px 1
     if (done) renderResult();
   }
 
-  function submit() {
+  async function submit() {
     const answer = $("ans").value.trim();
-    if (!answer) return;
+    if (!answer || busy) return;
+    busy = true; $("send").disabled = true;
     const before = total();
     const result = judge(answer, odai(), st.tries.map((t) => t.answer));
+    // 回答の吹き出しと「師匠が考え中」を先に出す
+    const th = $("thread");
+    if (st.tries.length) th.appendChild(el("hr", "sep"));
+    th.appendChild(el("div", "mine anim", answer));
+    const think = el("div", "thinking"); think.appendChild(el("i")); think.appendChild(el("i")); think.appendChild(el("i")); think.appendChild(el("span", null, "師匠が考えています…"));
+    th.appendChild(think);
+    $("ans").value = ""; $("form").hidden = true;
+    think.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "nearest" });
+    await wait(900);
     st.tries.push({ answer, zabuton: result.zabuton, result, showSample: st.tries.length >= 1 || result.zabuton < 2 });
-    $("ans").value = ""; st.phase = "judged"; save();
-    render(); renderPile(before);
-    $("thread").lastElementChild?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    st.phase = "judged"; save();
+    render(true); renderPile(before, REDUCED ? 0 : 0.7);
+    busy = false; $("send").disabled = false;
+    th.lastElementChild?.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "nearest" });
+  }
+  function flipOdai(change) {
+    const f = document.querySelector(".fuda");
+    if (REDUCED) { change(); return; }
+    restart(f, "flip"); setTimeout(change, 220);
   }
 
   function nextRound() {
     st.rounds.push({ q: odai().q, tries: st.tries.map(({ answer, zabuton }) => ({ answer, zabuton })), best: best() });
     st.tries = [];
-    if (st.q >= ROUNDS) { st.phase = "done"; save(); render(); renderPile(); return; }
+    if (st.q >= ROUNDS) { st.phase = "done"; save(); render(); renderPile(); rain(total()); return; }
     st.q++; st.cur = drawNext(); st.phase = "answer"; save();
-    render(); renderPile(); window.scrollTo({ top: 0 }); $("ans").focus();
+    window.scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" });
+    flipOdai(() => { render(); renderPile(); $("ans").focus(); });
   }
 
   function renderResult() {
@@ -449,17 +552,18 @@ blockquote { margin: 0; border-left: 4px solid var(--line); padding: 4px 0 4px 1
       const tr = el("tr"), td = el("td");
       td.appendChild(el("span", "q", "第" + (i + 1) + "問 " + r.q));
       td.appendChild(document.createTextNode(b ? b.answer : "(回答なし)"));
+      tr.style.setProperty("--d", (0.5 + i * 0.12).toFixed(2) + "s");
       tr.appendChild(td); tr.appendChild(el("td", "n", r.best + " 枚")); tbl.appendChild(tr);
     });
     box.appendChild(tbl);
     const again = el("button", "btn", "もう一度挑戦する"); again.type = "button";
-    again.onclick = () => { st = fresh(); save(); render(); renderPile(); window.scrollTo({ top: 0 }); };
+    again.onclick = () => { st = fresh(); save(); window.scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" }); flipOdai(() => { render(); renderPile(); }); };
     const row = el("div", "row"); row.appendChild(again); box.appendChild(row);
   }
 
   $("form").addEventListener("submit", (e) => { e.preventDefault(); submit(); });
   $("ans").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submit(); } });
-  $("skip").onclick = () => { st.cur = drawNext(); save(); render(); };
+  $("skip").onclick = () => { st.cur = drawNext(); save(); flipOdai(() => render()); };
   $("retry").onclick = () => { st.phase = "answer"; save(); render(); $("ans").focus(); };
   $("next").onclick = nextRound;
 
