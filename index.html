@@ -342,12 +342,12 @@ textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(i
   const ONOMA = /([ぁ-んァ-ヴ]{2})\1/;
   const TOKENS = /[一-龥々]{2,}|[ァ-ヴー]{2,}/g;
   const FORM_OK = {
-    reason: (t) => /(から|ため|せい|ので|おかげ)[。!?！？」]*$/.test(t) || t.includes("から"),
+    reason: (t) => (/(から|ため|せい|ので|おかげ)[。!?！？」]*$/.test(t) || t.includes("から")) ? true : null, // 「〜から」がなくても理由として通じる回答は多いので減点はしない
     line: (t, raw) => /[「『]/.test(raw) || !/(こと|とき|ところ|人|もの|様子|感じ|言う|言った|話す)[。!?！？]*$/.test(t),
     fill: (t) => [...t].length <= 28,
     thing: () => true,
     world: (t) => ARU.some((w) => t.includes(w)) || /(がち|てしまう|ちゃう|になる)[。!?！？]*$/.test(t),
-    naru: (t) => /(た|てた|かった|しい|ね|よ|な|けど|だった|ない|られる|される)[。!?！？]*$/.test(t) || /(俺|私|僕|自分|持ち主)/.test(t),
+    naru: (t) => (/(た|てた|かった|しい|ね|よ|な|けど|だった|ない|られる|される)[。!?！？]*$/.test(t) || /(俺|私|僕|自分|持ち主)/.test(t)) ? true : /(こと|もの|ところ)[。]*$/.test(t) ? false : null,
     sonna: (t) => !/(る|た|て|だ|です|ます|ない)[。!?！？]*$/.test(t),
     kashira: (t, raw, o) => { const c = t.replace(/^[「『]/, "")[0] || ""; if (/[一-龥々]/.test(c)) return null; return toHira(c) === toHira(o.k); } // 漢字始まりは読みが分からないので判定しない(null)
   };
@@ -407,7 +407,9 @@ textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(i
     else if (odai.p === "0" && (pos.length || neg.length)) gap = 1;
 
     // 省略:短く言い切って余白を残す(中身のある短文だけ)
-    const tanteki = len <= 15 && cliche.length === 0 && (life.length + place.length + pos.length + neg.length > 0 || !!num || quote || gap > 0 || (formOk === true && odai.t !== "thing" && odai.t !== "fill" && len >= 5));
+    // 省略:短く言い切った回答は、想像の余白があるとして評価する(票を集める回答は10文字前後が多い)
+    const tanteki = len >= 4 && len <= 15 && cliche.length === 0 && formOk !== false && !(odaiWords.length >= 2 && len < 10)
+      && !(/^[ぁ-んー]+$/.test(t) && len <= 6 && formOk !== true); // ひらがなだけの短い文字列(あいうえお等)は除く
     const short = len >= 4 && len <= 20;
 
     // 被り:前の回答と同じ要素を使い回していないか
@@ -430,8 +432,10 @@ textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(i
     let idea = 2.5 - Math.min(cliche.length, 2) * 1.5 + (odai.p === "w" ? 0 : gap * 0.75) + (life.length ? 1 : 0) + (cliche.length === 0 && len >= 8 ? 0.5 : 0) - (odaiWords.length >= 2 && len < 20 ? 1 : 0);
     if (odai.p === "w" && aru.length) idea += 1;
     if (hikimodoshi) idea += 1;
+    if (tanteki) idea += 0.5;
     // 情景:あるある・実体験に根ざした具体性
     let scene = 1 + (num ? 1.5 : 0) + (place.length ? 1 : 0) + (quote ? 1 : 0) + Math.min(kata.length, 2) * 0.75 + (onoma ? 0.75 : 0) + (life.length ? 0.5 : 0) + (aru.length ? 0.5 : 0) + (tanteki ? 0.75 : 0);
+    if (tanteki) scene = Math.max(scene, 3);
     // 構成:お題の形式に沿う、オチを最後に、もう一言足す、ノイズの少なさ
     let form = 1.5 + (formOk === true ? 1 : formOk === false ? -0.5 : 0) + (ochiLate ? 1 : 0) + (addOn ? 1 : 0) + (elem.length ? 0.5 : 0) + (twist.length ? 0.5 : 0) + (polite.length && odai.t === "line" ? 0.5 : 0)
       + (short ? 0.5 : 0) - (len > 45 ? 0.5 : 0) - (len > 60 ? 1 : 0) - (len < 6 && !tanteki ? 1 : 0)
@@ -472,9 +476,9 @@ textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(i
 
     // 情景
     const sceneBits = [num && "「" + num[0] + "」という数字", place[0] && "「" + place[0] + "」という場面", quote && "セリフ", kata[0] && "「" + kata[0] + "」", aru[0] && "「" + aru[0] + "」のあるある感", onoma && "音の言葉"].filter(Boolean);
-    if (scores[1] >= 4) points.push(["情景", sceneBits.slice(0, 2).join("と") + "で、画がくっきり浮かぶ。"]);
+    if (scores[1] >= 4 && sceneBits.length) points.push(["情景", sceneBits.slice(0, 2).join("と") + "で、画がくっきり浮かぶ。"]);
+    else if (tanteki) points.push(["情景", "説明を省いて、画は受け手の想像に任せてる。短いぶん、伝わったときがいちばん強い。"]);
     else if (scores[1] >= 3) points.push(["情景", (sceneBits[0] || "具体的な言葉") + "のおかげで、なんとなく画は見える。もう一個だけ具体を足したい。"]);
-    else if (tanteki) points.push(["情景", "短いぶん、画は受け手の想像に任せてる。伝わればいちばん強い形。"]);
     else points.push(["情景", "まだ画がぼんやりしてる。自分が見たことあるあるあるや実体験から、「いつ・どこで・何回」を一個足すと一気に見える。"]);
 
     // 構成
@@ -497,7 +501,8 @@ textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(i
         : odai.f ? "非日常のお題なので、タクシーや役所みたいな現実のあるあるを起こしてみよう。現実に引き戻すだけでギャップが生まれる。"
         : odai.p === "w" ? "世界お題は、その世界に行ってみるか、今の日本がその世界になったら何が起きるかを想像してみよう。"
         : "お題の世界で何かマイナスなことを起こしてみよう。「確定申告」「既読」みたいな、お題から遠い生活の言葉を持ち込むのも鉄板。",
-      "数字や場所を入れてみよう。「たまに」より「3分おきに」、「たくさん」より「800円」のほうが画が浮かぶ。",
+      tanteki ? "短さはそのままで、言葉を一つだけもっと具体的なものに替えてみよう。「お菓子」より「ポテチの最後の一枚」のほうが画が浮かぶ。"
+        : "数字や場所を入れてみよう。「たまに」より「3分おきに」、「たくさん」より「800円」のほうが画が浮かぶ。",
       len > 30 ? "削れる言葉を削ろう。短く言い切るほど、伝わったときの面白さが増す。" : "オチになる言葉を最後に回そう。思いつかなければ、小さいボケをもう一個重ねるのもあり。"
     ];
     if (zabuton < 3) points.push(["改善ポイント", TIPS[weakest]]);
