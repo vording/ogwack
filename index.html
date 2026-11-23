@@ -193,7 +193,7 @@ textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(i
     <label for="ans">あなたの回答</label>
     <textarea id="ans" maxlength="200"></textarea>
     <div class="row">
-      <span class="hint">師匠が採点して講評します</span>
+      <span class="hint">回答すると採点して講評します</span>
       <button class="btn" id="send" type="submit">回答する</button>
     </div>
   </form>
@@ -374,7 +374,7 @@ textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(i
 
     // ---------- 講評の組み立て ----------
     const REACT = [
-      ["うーん、言いたいことは分かる!でももうひと押し。", "惜しい!方向はいいけど、まだ普通の答えに見えちゃう。", "あー、そう来たか。ただ、まだ師匠は笑ってない。"],
+      ["うーん、言いたいことは分かる!でももうひと押し。", "惜しい!方向はいいけど、まだ普通の答えに見えちゃう。", "あー、そう来たか。ただ、まだ笑いまでは届いてない。"],
       ["なるほど、そう来たか。ちょっとニヤッとした。", "おっ、悪くない。じわっとくるタイプ。", "うん、ちゃんと大喜利になってる!"],
       ["あー、いいねこれ!笑", "これは好き!画が見えた。", "いいとこ突いてくるね!笑"],
       ["うわ、これは座布団持ってけ!笑", "やられた!これは声出た。笑", "完璧。今日いちばんの一本かも。"]
@@ -535,7 +535,7 @@ textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(i
     j.appendChild(ul);
     if (last && t.showSample) {
       const sd = (1.5 + g.points.length * 0.18).toFixed(2) + "s";
-      const a = el("div", null, "ちなみに師匠ならこう答える。"); a.style.setProperty("--d", sd); j.appendChild(a);
+      const a = el("h3", null, "回答例"); a.style.setProperty("--d", sd); j.appendChild(a);
       const q = el("blockquote", null, g.sample); q.style.setProperty("--d", sd); j.appendChild(q);
     }
     if (anim && g.zabuton === 3) { burst(v, 18); v.classList.add("shake"); }
@@ -570,7 +570,7 @@ textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(i
     const th = $("thread");
     if (st.tries.length) th.appendChild(el("hr", "sep"));
     th.appendChild(el("div", "mine anim", answer));
-    const think = el("div", "thinking"); think.appendChild(el("i")); think.appendChild(el("i")); think.appendChild(el("i")); think.appendChild(el("span", null, "師匠が考えています…"));
+    const think = el("div", "thinking"); think.appendChild(el("i")); think.appendChild(el("i")); think.appendChild(el("i")); think.appendChild(el("span", null, "採点中…"));
     th.appendChild(think);
     $("ans").value = ""; $("form").hidden = true;
     think.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "nearest" });
