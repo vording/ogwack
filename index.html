@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
 <style>
-/* Layout: 寄席の高座。1台のスマホを回すパーティーゲーム。上に状況、中央に1枚の札(画面ごとの主役)、下に座布団の山。1カラム、最大 560px */
+/* Layout: 寄席の高座。上に座布団の山と番付、中央にお題札、下に回答と師匠の講評。1カラム、最大 640px */
 :root {
   --bg: #eef0f5;
   --surface: #ffffff;
@@ -40,385 +40,339 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 20px 48px;
 }
-.wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-h1, h2, .display { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; }
+.wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1, h2 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; }
 button { font: inherit; cursor: pointer; }
-button:focus-visible, textarea:focus-visible, input:focus-visible { outline: 3px solid var(--tassel); outline-offset: 2px; }
+button:focus-visible, textarea:focus-visible { outline: 3px solid var(--tassel); outline-offset: 2px; }
 
-.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .brand { display: flex; align-items: baseline; gap: 10px; }
 .brand h1 { font-size: 1.6rem; letter-spacing: 0.04em; }
 .brand small { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.08em; }
-.status { color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
-.status b { color: var(--ink); }
+.status { display: flex; gap: 14px; color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.status b { color: var(--ink); font-size: 1.05rem; }
 
-/* 札 */
-.fuda { background: var(--surface); border: 2px solid var(--ink); border-radius: 4px; padding: 22px 20px 20px; position: relative; display: flex; flex-direction: column; gap: 14px; }
-.fuda > .label { position: absolute; top: -13px; left: 16px; background: var(--shu); color: #fff; font-size: 0.78rem; font-weight: 700; padding: 1px 10px; border-radius: 3px; letter-spacing: 0.12em; }
+.stage { display: flex; align-items: flex-end; gap: 16px; }
+.pilebox { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.pile { display: flex; flex-direction: column-reverse; align-items: center; min-height: 28px; width: 112px; }
+.zb { width: 104px; height: 16px; border-radius: 7px; margin-top: -3px; background: linear-gradient(var(--zabuton), var(--zabuton-edge)); box-shadow: 0 1px 0 rgba(0,0,0,.18); position: relative; }
+.zb::before, .zb::after { content: ""; position: absolute; top: 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--tassel); }
+.zb::before { left: -2px; } .zb::after { right: -2px; }
+.zb.new { animation: drop .5s cubic-bezier(.3,1.4,.5,1) both; }
+@keyframes drop { from { transform: translateY(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.floor { width: 112px; height: 4px; border-radius: 2px; background: var(--line); }
+.rank { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.06em; }
+.rank b { color: var(--zabuton); font-family: var(--display); font-weight: 400; font-size: 1rem; }
+
+.fuda { flex: 1; min-width: 0; background: var(--surface); border: 2px solid var(--ink); border-radius: 4px; padding: 18px 20px 20px; position: relative; }
+.fuda .label { position: absolute; top: -13px; left: 16px; background: var(--shu); color: #fff; font-size: 0.78rem; font-weight: 700; padding: 1px 10px; border-radius: 3px; letter-spacing: 0.12em; }
 .fuda h2 { font-size: 1.3rem; line-height: 1.55; }
-.big { font-size: 1.5rem; line-height: 1.5; font-family: var(--display); text-wrap: balance; white-space: pre-wrap; overflow-wrap: anywhere; }
-.muted { color: var(--muted); font-size: 0.88rem; }
-.who { font-family: var(--display); color: var(--zabuton); font-size: 1.15rem; }
+.fuda .acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+@media (max-width: 520px) {
+  .stage { flex-direction: column-reverse; align-items: stretch; }
+  .pilebox { flex-direction: row; justify-content: center; gap: 14px; }
+  .floor { display: none; }
+}
 
-.btn { border: 0; border-radius: 999px; padding: 11px 22px; font-weight: 700; background: var(--zabuton); color: #fff; }
+.btn { border: 0; border-radius: 999px; padding: 10px 20px; font-weight: 700; background: var(--zabuton); color: #fff; }
 .btn:hover { filter: brightness(1.08); }
 .btn:disabled { opacity: .45; cursor: default; filter: none; }
 .btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); font-weight: 500; padding: 7px 14px; font-size: 0.88rem; }
 .btn.ghost:hover { border-color: var(--muted); }
 .btn.shu { background: var(--shu); }
-.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.row.end { justify-content: flex-end; }
-.row.between { justify-content: space-between; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
 
-textarea, input[type="text"] {
-  width: 100%; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink);
-  padding: 12px 14px; font: inherit; line-height: 1.6;
-}
-textarea { min-height: 100px; resize: vertical; }
+.answer { display: flex; flex-direction: column; gap: 10px; }
+.answer label { font-size: 0.85rem; color: var(--muted); letter-spacing: 0.06em; }
+textarea { width: 100%; min-height: 96px; resize: vertical; border: 1.5px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); padding: 14px 16px; font: inherit; line-height: 1.7; }
+.hint { font-size: 0.8rem; color: var(--muted); }
 
-/* 参加者 */
-.players { display: flex; flex-direction: column; gap: 8px; }
-.prow { display: flex; gap: 8px; align-items: center; }
-.prow input { flex: 1; min-width: 0; }
-.prow .x { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--line); background: transparent; color: var(--muted); }
-.seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 999px; overflow: hidden; }
-.seg button { border: 0; background: transparent; color: var(--ink); padding: 6px 14px; font-size: 0.88rem; }
-.seg button[aria-pressed="true"] { background: var(--zabuton); color: #fff; }
+.thread { display: flex; flex-direction: column; gap: 18px; }
+.mine { align-self: flex-end; max-width: 85%; background: var(--quote); border-radius: 20px; padding: 12px 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.judge { display: flex; flex-direction: column; gap: 12px; }
+.reaction { font-size: 1.05rem; }
+.verdict { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.stamp { font-family: var(--display); color: var(--shu); border: 2.5px solid var(--shu); border-radius: 6px; padding: 2px 12px; transform: rotate(-4deg); font-size: 1.05rem; background: var(--shu-soft); }
+.meters { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.82rem; color: var(--muted); }
+.meter { display: flex; align-items: center; gap: 6px; }
+.dots { display: inline-flex; gap: 3px; }
+.dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.dots i.on { background: var(--zabuton); }
+.judge h3 { font-family: var(--display); font-weight: 400; font-size: 1.05rem; margin: 4px 0 0; }
+.points { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+blockquote { margin: 0; border-left: 4px solid var(--line); padding: 4px 0 4px 16px; white-space: pre-wrap; }
+.sep { border: 0; border-top: 1px solid var(--line); margin: 4px 0; }
 
-/* 座布団ボタン */
-.award { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.award button { border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 12px; padding: 8px 2px; font-size: 0.8rem; line-height: 1.3; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.award button b { font-family: var(--display); font-weight: 400; font-size: 1.15rem; }
-.award button.minus b { color: var(--shu); }
-.award button:hover { border-color: var(--zabuton); }
-
-/* 座布団の山(得点表) */
-.board { display: flex; gap: 14px; align-items: flex-end; overflow-x: auto; padding: 8px 2px 4px; }
-.col { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 72px; flex: 1; }
-.pile { display: flex; flex-direction: column-reverse; align-items: center; min-height: 12px; }
-.zb { width: 64px; height: 12px; border-radius: 6px; margin-top: -2px; background: linear-gradient(var(--zabuton), var(--zabuton-edge)); box-shadow: 0 1px 0 rgba(0,0,0,.18); position: relative; }
-.zb::before, .zb::after { content: ""; position: absolute; top: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--tassel); }
-.zb::before { left: -2px; } .zb::after { right: -2px; }
-.zb.new { animation: drop .5s cubic-bezier(.3,1.4,.5,1) both; }
-@keyframes drop { from { transform: translateY(-30px); opacity: 0; } to { transform: none; opacity: 1; } }
-.floor { width: 72px; height: 3px; border-radius: 2px; background: var(--line); }
-.col .nm { font-size: 0.82rem; max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.col .pt { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--zabuton); font-size: 0.9rem; }
-.col.mc .nm::after { content: " 司会"; color: var(--shu); font-size: 0.72rem; }
-
-/* 発表 */
-.list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
-.list li { background: var(--quote); border-radius: 14px; padding: 10px 14px; display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; }
-.list li > div { min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
-.list .by { display: block; color: var(--muted); font-size: 0.8rem; white-space: normal; }
-.list .n { flex-shrink: 0; font-weight: 700; color: var(--zabuton); font-variant-numeric: tabular-nums; }
-.list .n.neg { color: var(--shu); }
-.stamp { align-self: flex-start; font-family: var(--display); color: var(--shu); border: 2.5px solid var(--shu); border-radius: 6px; padding: 2px 12px; transform: rotate(-4deg); background: var(--shu-soft); }
-.progress { display: flex; gap: 6px; }
-.progress i { flex: 1; height: 4px; border-radius: 2px; background: var(--line); }
-.progress i.on { background: var(--zabuton); }
+.result { background: var(--surface); border-radius: 18px; padding: 24px 20px; display: flex; flex-direction: column; gap: 14px; border: 1.5px solid var(--line); }
+.result h2 { font-size: 1.6rem; }
+.result table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.result td { padding: 8px 4px; border-top: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+.result td.n { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--zabuton); font-weight: 700; text-align: right; }
+.result .q { color: var(--muted); font-size: 0.8rem; display: block; }
 @media (prefers-reduced-motion: reduce) { .zb.new { animation: none; } }
 </style>
 
 <div class="wrap">
   <header class="top">
-    <div class="brand"><h1>大喜利道場</h1><small>みんなで1台</small></div>
-    <div class="status" id="status"></div>
+    <div class="brand"><h1>大喜利道場</h1><small>ひとり稽古・5問勝負</small></div>
+    <div class="status"><span>第 <b id="qnum">1</b> / 5 問</span><span>座布団 <b id="total">0</b> 枚</span></div>
   </header>
-  <main id="screen"></main>
-  <section id="boardWrap" hidden>
-    <div class="board" id="board" aria-label="座布団の枚数"></div>
+
+  <section class="stage">
+    <div class="fuda">
+      <span class="label">お題</span>
+      <h2 id="odai">…</h2>
+      <div class="acts"><button class="btn ghost" id="skip" type="button">別のお題にする</button></div>
+    </div>
+    <div class="pilebox">
+      <div class="pile" id="pile" aria-label="獲得した座布団"></div>
+      <div class="floor"></div>
+      <div class="rank">番付 <b id="rank">見習い</b></div>
+    </div>
   </section>
-  <div id="quitRow"></div>
+
+  <section class="thread" id="thread" aria-live="polite"></section>
+
+  <form class="answer" id="form">
+    <label for="ans">あなたの回答</label>
+    <textarea id="ans" maxlength="200" placeholder="例:毎晩きっちり22時に出て、22時5分には帰っていく"></textarea>
+    <div class="row">
+      <span class="hint">師匠が「具体性」「定番を外しているか」「ひねり」を見て採点します</span>
+      <button class="btn" id="send" type="submit">回答する</button>
+    </div>
+  </form>
+
+  <div class="row" id="nav" hidden>
+    <button class="btn ghost" id="retry" type="button">同じお題でもう一回</button>
+    <button class="btn shu" id="next" type="button">次のお題へ</button>
+  </div>
+
+  <section class="result" id="result" hidden></section>
 </div>
 
 <script>
 (() => {
+  // q: お題 / c: このお題で誰でも思いつく定番ワード / s: 師匠の一本(参考回答)
   const ODAI = [
-    "絶対に幽霊が出るのに、全然怖くない心霊スポット。その理由は?",
-    "こんなコンビニは嫌だ。どんなコンビニ?",
-    "宇宙人が地球に来て、最初にがっかりしたことは?",
-    "100年後の運動会で行われている新競技とは?",
-    "「この人、絶対に転職したばかりだな」と思った瞬間とは?",
-    "忍者の履歴書。特技の欄に書いてあったことは?",
-    "全然売れないおみくじ。何が書いてある?",
-    "猫が人間に対して、密かに思っていることは?",
-    "ロボットが初めて「疲れた」と言った。その理由は?",
-    "魔王が勇者に送った、ちょっと気まずいメールの内容は?",
-    "世界一やる気のないカーナビ。何と言った?",
-    "雪だるまが春に向けて準備していることは?",
-    "新しくできた祝日「○○の日」。何をする日?",
-    "天気予報士がつい本音を言ってしまった。何と言った?",
-    "冷蔵庫が家族会議に参加。どんな意見を言った?",
-    "校長先生の話が今日だけ短かった。その理由は?",
-    "「このラーメン屋、こだわりが強すぎる」どんなこだわり?",
-    "タイムマシンができたのに誰も使わない。その理由は?",
-    "異世界に転生したのに全然チートじゃなかった。どんな能力?",
-    "名探偵が犯人を見つけたのに言い出せない。その理由は?",
-    "自動販売機が売り切れランプでこっそり伝えたいことは?",
-    "ペンギンが空を飛べない本当の理由は?",
-    "引っ越し業者が思わず二度見した荷物とは?",
-    "図書館の「静かに」の貼り紙。よく見たら何て書いてある?",
-    "RPGの村人Aが、実は毎日悩んでいることは?",
-    "「この美術館、何かおかしい」どこがおかしい?",
-    "サンタクロースが今年からやめたことは?",
-    "家の鍵が急にしゃべり出した。最初のひとことは?",
-    "「この先生、絶対に元ヤンキーだな」と思った瞬間とは?",
-    "地球最後の日、コンビニの店員さんが言ったことは?"
+    { q: "絶対に幽霊が出るのに、全然怖くない心霊スポット。その理由は?", c: ["優しい", "いい人", "いい幽霊", "かわいい", "明るい", "友達", "成仏", "昼"], s: "毎晩きっちり22時に出て、22時5分には「じゃ、また明日」と帰っていく。" },
+    { q: "こんなコンビニは嫌だ。どんなコンビニ?", c: ["高い", "店員が怖", "遠い", "開いてない", "24時間じゃない", "何も売ってない", "暗い"], s: "レジ横のホットスナックが全部店長の手作りで、どれもちょっと生焼け。" },
+    { q: "宇宙人が地球に来て、最初にがっかりしたことは?", c: ["狭い", "汚い", "戦争", "ゴミ", "弱い", "小さい"], s: "UFOを停めようとしたら、どこもコインパーキングで1時間800円だった。" },
+    { q: "100年後の運動会で行われている新競技とは?", c: ["ロボット", "空を飛", "宇宙", "ワープ", "AI", "VR", "瞬間移動"], s: "親子でパスワード再設定リレー。最後の走者が秘密の質問の答えを忘れる。" },
+    { q: "「この人、絶対に転職したばかりだな」と思った瞬間とは?", c: ["緊張", "スーツが新し", "名刺", "迷子", "挨拶", "敬語"], s: "社内チャットのスタンプを前の会社のノリで送り、既読が3つで止まった。" },
+    { q: "忍者の履歴書。特技の欄に書いてあったことは?", c: ["手裏剣", "隠れ", "変身", "分身", "忍術", "足が速", "忍び足"], s: "特技:エクセルで行を非表示にすること。" },
+    { q: "全然売れないおみくじ。何が書いてある?", c: ["大凶", "死", "不幸", "最悪", "呪"], s: "待ち人:来ない。そもそもあなたは誰も待っていない。" },
+    { q: "猫が人間に対して、密かに思っていることは?", c: ["バカ", "下僕", "ご飯", "エサ", "邪魔", "遅い"], s: "その四角い光る板、そんなに面白いなら一回だけ上に乗らせて。" },
+    { q: "ロボットが初めて「疲れた」と言った。その理由は?", c: ["充電", "電池", "バッテリー", "働きすぎ", "残業", "休みたい"], s: "毎朝「OK、〇〇」と呼ばれるたびに、本名じゃないのが地味に効いてきた。" },
+    { q: "魔王が勇者に送った、ちょっと気まずいメールの内容は?", c: ["ごめん", "降参", "許して", "仲良く", "友達", "好き"], s: "件名:Re:Re:Re:城の鍵 本文:前回の宿屋代、まだ精算されていないようです。" },
+    { q: "世界一やる気のないカーナビ。何と言った?", c: ["知らない", "適当", "自分で", "勝手に", "めんどくさ"], s: "「この先、たぶん右。違ったらまた言って」" },
+    { q: "雪だるまが春に向けて準備していることは?", c: ["溶け", "引っ越", "北極", "冷蔵庫", "冷凍庫", "逃げ"], s: "毎朝少しずつ痩せていくので、春に向けてジム通いをやめた。" },
+    { q: "新しくできた祝日「○○の日」。何をする日?", c: ["寝る", "休む", "何もしない", "ゴロゴロ", "ゲーム", "お菓子"], s: "「上司の日」。上司が部下の席に座り、一日中「これ誰に聞けばいいの」と言う日。" },
+    { q: "天気予報士がつい本音を言ってしまった。何と言った?", c: ["わからない", "知らない", "適当", "外れ", "当たらない", "自分で見"], s: "「明日は晴れでしょう。なぜなら私が有給だからです」" },
+    { q: "冷蔵庫が家族会議に参加。どんな意見を言った?", c: ["冷たい", "開けすぎ", "閉めて", "満杯", "電気代", "寒い"], s: "「奥の小鉢、3月から誰の担当か決まっていません」" },
+    { q: "校長先生の話が今日だけ短かった。その理由は?", c: ["急いで", "トイレ", "暑い", "寝坊", "ネタがない", "忘れ"], s: "マイクのコードが3メートルしかなく、話しながら少しずつ遠ざかっていったから。" },
+    { q: "「このラーメン屋、こだわりが強すぎる」どんなこだわり?", c: ["スープ", "麺", "黙って", "残すな", "写真禁止", "スマホ禁止", "話すな"], s: "替え玉を頼むと、店主が前の麺の思い出を3分間語ってから出してくれる。" },
+    { q: "タイムマシンができたのに誰も使わない。その理由は?", c: ["高い", "危ない", "戻れない", "過去を変え", "怖い", "酔う"], s: "行き先の年を入力するたびに、利用規約に同意し直す必要があるから。" },
+    { q: "異世界に転生したのに全然チートじゃなかった。どんな能力?", c: ["弱い", "スライム", "何もできない", "遅い", "普通"], s: "どんな魔物とも3分で世間話ができる。戦いにはならない。" },
+    { q: "名探偵が犯人を見つけたのに言い出せない。その理由は?", c: ["好き", "家族", "恋人", "自分", "依頼人", "友達"], s: "犯人が、さっき自分に傘を貸してくれた人だったから。" },
+    { q: "自動販売機が売り切れランプでこっそり伝えたいことは?", c: ["助けて", "疲れた", "買って", "補充", "休みたい", "好き"], s: "「つめた〜い」の列だけ売り切れランプを点けて、冷え性をアピールしている。" },
+    { q: "ペンギンが空を飛べない本当の理由は?", c: ["重い", "太", "羽が小さ", "泳", "寒い", "魚"], s: "一度でも飛んだら、職場のみんなが毎回期待するから。" },
+    { q: "引っ越し業者が思わず二度見した荷物とは?", c: ["死体", "棺", "爆弾", "金庫", "大きい", "重い", "ペット"], s: "「こわれもの」と書かれた段ボールに、元カレからの手紙が3通だけ。" },
+    { q: "図書館の「静かに」の貼り紙。よく見たら何て書いてある?", c: ["うるさい", "黙れ", "しゃべるな", "静かにしろ", "声"], s: "「静かに。司書が昼寝中です」" },
+    { q: "RPGの村人Aが、実は毎日悩んでいることは?", c: ["同じこと", "セリフ", "勇者", "暇", "名前", "モブ"], s: "毎日同じ場所に立っているのに、通販の置き配が一度も届かない。" },
+    { q: "「この美術館、何かおかしい」どこがおかしい?", c: ["絵が動", "目が動", "夜", "幽霊", "偽物", "逆さま"], s: "モナ・リザの横に「ポイントカードお作りしますか?」の貼り紙。" },
+    { q: "サンタクロースが今年からやめたことは?", c: ["煙突", "プレゼント", "トナカイ", "ソリ", "ダイエット", "太"], s: "「良い子リスト」を手書きするのをやめて、スプレッドシートにした。" },
+    { q: "家の鍵が急にしゃべり出した。最初のひとことは?", c: ["開けて", "おかえり", "ただいま", "鍵穴", "閉めて", "忘れ"], s: "「昨日ポケットの中で、小銭とちょっと揉めた」" },
+    { q: "「この先生、絶対に元ヤンキーだな」と思った瞬間とは?", c: ["怖い", "怒", "タバコ", "バイク", "喧嘩", "ガラが悪"], s: "出席を取るとき、遅刻した生徒の名前だけやけに巻き舌になる。" },
+    { q: "地球最後の日、コンビニの店員さんが言ったことは?", c: ["ありがとう", "さよなら", "最後", "好き", "逃げ"], s: "「温めますか?……あ、もうみんな温まってますね」" }
   ];
-  const AWARDS = [[-1, "没収"], [0, "なし"], [1, "1枚"], [2, "2枚"], [3, "3枚"]];
-  const KEY = "ogiri-party-v1";
+
+  // ---------- 採点ロジック(AIなし・ルールベース) ----------
+  const LIFE = ["役所", "確定申告", "住民票", "年金", "保険", "有給", "会議", "稟議", "ハンコ", "ローン", "町内会", "PTA", "回覧板", "税金", "上司", "部下", "シフト", "ポイントカード", "既読", "サブスク", "経費", "領収書", "残業代", "スプレッドシート", "エクセル", "パスワード", "利用規約", "クーポン", "レシート", "給料", "家賃", "定期券", "健康診断", "面接", "履歴書", "議事録", "日報", "飲み会", "割り勘", "宅配", "置き配", "駐車場", "コインパーキング", "ポイント", "マイナンバー"];
+  const PLACE = ["朝", "夜", "毎晩", "毎朝", "深夜", "昼休み", "月曜", "金曜", "週末", "駅", "学校", "会社", "職場", "トイレ", "風呂", "布団", "玄関", "公園", "スーパー", "電車", "エレベーター", "レジ", "ホーム", "台所", "冷蔵庫", "教室", "病院", "交番"];
+  const TWIST = ["のに", "ただし", "けど", "だけど", "でも", "しかも", "なぜか", "逆に", "結局", "実は", "かと思ったら", "と思いきや", "わりに", "くせに"];
+  const POLITE = ["ください", "しております", "させていただ", "いたします", "でございます", "恐れ入", "申し訳"];
+  const GIVEUP = ["わからない", "特にない", "なし", "思いつかない", "パス", "むり", "無理"];
+  const CNT = "(?:人|回|分|秒|個|枚|年|日|時間|時|円|匹|本|歳|階|キロ|メートル|件|通|杯|周|台|着|曲|ページ)";
+  const NUM = new RegExp("[0-9０-９]+" + CNT + "?|[一二三四五六七八九十百千万]+" + CNT);
+  const KATA = /[ァ-ヴー]{3,}/g;
+  const ONOMA = /([ぁ-んァ-ヴ]{2})\1/;
+  const has = (t, list) => list.filter((w) => t.includes(w));
+  const clamp = (n) => Math.max(1, Math.min(5, Math.round(n)));
+  const pick = (arr, seed) => arr[Math.abs(seed) % arr.length];
+  const hash = (s) => { let h = 7; for (const ch of s) h = (h * 31 + ch.codePointAt(0)) | 0; return h; };
+
+  function judge(answer, odai, prevAnswers) {
+    const t = answer.replace(/\s+/g, "");
+    const len = [...t].length;
+    const seed = hash(t);
+    if (len < 3 || GIVEUP.some((w) => t === w || (len <= 8 && t.includes(w)))) {
+      return { zabuton: 0, scores: [1, 1, 1], reaction: "いやいや、それは回答じゃなくて降参でしょ!笑", points: [["発想", "まだ何も始まってない。とりあえず一個、なんでもいいから言ってみよう。"], ["改善ポイント", "思いつかないときは「いつ・どこで・誰が」を一個決めてから考えると出やすい。"]], sample: odai.s };
+    }
+    const cliche = has(t, odai.c);
+    const life = has(t, LIFE);
+    const place = has(t, PLACE);
+    const twist = has(t, TWIST);
+    const polite = has(t, POLITE);
+    const num = t.match(NUM);
+    const kata = (t.match(KATA) || []).filter((w) => !odai.q.includes(w));
+    const quote = /「.+」|『.+』/.test(answer);
+    const onoma = ONOMA.test(t);
+    const odaiWords = (odai.q.match(/[一-龥]{2,}|[ァ-ヴー]{2,}/g) || []).filter((w) => t.includes(w));
+    const sentences = answer.split(/[。!?!?]/).map((s) => s.trim()).filter(Boolean);
+    const punchy = sentences.length >= 2 && [...sentences[sentences.length - 1]].length <= 14;
+    const repeated = prevAnswers.includes(answer.trim());
+
+    // 発想:定番を外しているか、お題から遠い世界を持ち込めているか
+    let idea = 3 - cliche.length * 1.5 + (life.length ? 1.5 : 0) - (odaiWords.length >= 2 ? 1 : 0) + (cliche.length === 0 && len >= 8 ? 0.5 : 0);
+    // 情景:画が浮かぶ具体性
+    let scene = 1 + (num ? 1.5 : 0) + Math.min(kata.length, 2) * 0.75 + (place.length ? 1 : 0) + (quote ? 1 : 0) + (onoma ? 0.75 : 0) + (life.length ? 0.5 : 0);
+    // 意外性:ひねり・裏切り・言葉のキレ
+    let surprise = 2 + (twist.length ? 1 : 0) + (punchy ? 1 : 0) + (polite.length ? 1 : 0) + (len >= 10 && len <= 45 ? 1 : 0) - (len > 70 ? 1 : 0) - (len < 8 ? 1 : 0);
+    if (repeated) { idea -= 1; surprise -= 1; }
+    const scores = [clamp(idea), clamp(scene), clamp(surprise)];
+    const sum = scores[0] + scores[1] + scores[2];
+    const zabuton = sum >= 13 ? 3 : sum >= 10 ? 2 : sum >= 7 ? 1 : 0;
+
+    const REACT = [
+      ["うーん、言いたいことは分かる!でももうひと押し。", "惜しい!方向はいいけど、まだ普通の答えに見えちゃう。", "あー、そう来たか。ただ、まだ師匠は笑ってない。"],
+      ["なるほど、そう来たか。ちょっとニヤッとした。", "おっ、悪くない。じわっとくるタイプ。", "うん、ちゃんと大喜利になってる!"],
+      ["あー、いいねこれ!笑", "これは好き!絵が見えた。", "いいとこ突いてくるね!笑"],
+      ["うわ、これは座布団持ってけ!笑", "やられた!これは声出た。笑", "完璧。今日いちばんの一本かも。"]
+    ];
+    let reaction = pick(REACT[zabuton], seed);
+    const hook = num ? num[0] : life[0] || kata[0] || place[0];
+    if (zabuton >= 2 && hook) reaction += "「" + hook + "」が効いてる。";
+    if (repeated) reaction = "それ、さっきと同じ回答だね!笑 " + reaction;
+
+    const points = [];
+    if (cliche.length) points.push(["発想", "「" + cliche[0] + "」はこのお題だと誰でも最初に思いつくやつ。そこからもうひとひねり欲しい。"]);
+    else if (life.length) points.push(["発想", "「" + life[0] + "」みたいな生活感のある言葉をお題に持ち込んだのがうまい。世界のズレが笑いになってる。"]);
+    else if (odaiWords.length >= 2) points.push(["発想", "お題の言葉をなぞっている感じがある。お題から一番遠い世界(役所、会社、町内会…)を持ってくると化ける。"]);
+    else points.push(["発想", "定番は外せてる。ここから「なんでそこ?」と言われるくらい遠くに飛ばすともっと強い。"]);
+
+    const sceneBits = [num && "「" + num[0] + "」という数字", place[0] && "「" + place[0] + "」という場面", quote && "セリフ", kata[0] && "「" + kata[0] + "」", onoma && "音の言葉"].filter(Boolean);
+    if (scores[1] >= 4) points.push(["情景", sceneBits.slice(0, 2).join("と") + "で、画がくっきり浮かぶ。"]);
+    else if (scores[1] >= 3) points.push(["情景", (sceneBits[0] || "具体的な言葉") + "のおかげで、なんとなく画は見える。もう一個だけ具体を足したい。"]);
+    else points.push(["情景", "まだ画がぼんやりしてる。「いつ・どこで・何回」のどれかを足すと一気に見えてくる。"]);
+
+    const weakest = scores.indexOf(Math.min(...scores));
+    const TIPS = [
+      "お題と関係なさそうな世界の言葉を一個入れてみよう。「確定申告」「町内会」「既読」みたいな生活感のある言葉は鉄板。",
+      "数字を入れてみよう。「たまに」より「3分おきに」、「たくさん」より「800円」のほうが画が浮かぶ。",
+      "最後に「ただし〜」「なのに〜」で裏切りを足すか、2文目を短いオチにしてみよう。丁寧語で言い切るのも効く。"
+    ];
+    if (zabuton < 3) points.push(["改善ポイント", TIPS[weakest]]);
+    else points.push(["改善ポイント", "言うことなし!このキレを次のお題でも。"]);
+
+    return { zabuton, scores, reaction, points, sample: odai.s };
+  }
+
+  // ---------- ゲーム進行 ----------
+  const ROUNDS = 5;
+  const RANKS = [[14, "名人"], [11, "真打"], [8, "二ツ目"], [4, "前座"], [0, "見習い"]];
+  const VERDICT = ["座布団なし", "座布団1枚", "座布団2枚", "座布団3枚!"];
+  const KEY = "ogiri-solo-v1";
   const $ = (id) => document.getElementById(id);
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-  function btn(text, cls, onclick) { const b = el("button", "btn" + (cls ? " " + cls : ""), text); b.type = "button"; b.onclick = onclick; return b; }
-
+  const allIdx = () => shuffle(ODAI.map((_, i) => i));
+  const fresh = () => { const deck = allIdx(); return { deck, q: 1, cur: deck.shift(), tries: [], rounds: [], phase: "answer" }; };
   let st;
-  const blank = () => ({ phase: "setup", names: ["", "", ""], laps: 1, players: [], round: 0, totalRounds: 0, deck: [], odai: "", order: [], ai: 0, answers: {}, judgeOrder: [], ji: 0, awards: {}, history: [], lastGain: {} });
 
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch {} }
-  function load() { try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); return s && s.phase ? s : null; } catch { return null; } }
+  function load() { try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); return s && typeof s.cur === "number" && ODAI[s.cur] ? s : null; } catch { return null; } }
   window.claude?.hot?.snapshot?.(() => ({ st }));
 
-  const mc = () => st.players[st.round % st.players.length];
-  const score = (p) => st.history.reduce((s, r) => s + (r.awards[p] || 0), 0) + (st.phase === "reveal" ? 0 : 0);
-  const nextOdai = () => { if (!st.deck.length) st.deck = shuffle(ODAI); return st.deck.shift(); };
+  const odai = () => ODAI[st.cur];
+  const best = () => st.tries.reduce((m, t) => Math.max(m, t.zabuton), 0);
+  const total = () => st.rounds.reduce((s, r) => s + r.best, 0) + (st.phase === "done" ? 0 : best());
+  const rankOf = (n) => RANKS.find(([min]) => n >= min)[1];
+  const drawNext = () => { if (!st.deck.length) st.deck = allIdx(); return st.deck.shift(); };
 
-  function go(phase) { st.phase = phase; save(); render(); window.scrollTo({ top: 0 }); }
-
-  function renderBoard(animate) {
-    const show = st.players.length && st.phase !== "setup";
-    $("boardWrap").hidden = !show;
-    if (!show) return;
-    const b = $("board"); b.textContent = "";
-    st.players.forEach((p) => {
-      const c = el("div", "col" + (st.phase !== "final" && p === mc() ? " mc" : ""));
-      const pile = el("div", "pile");
-      const n = Math.max(0, score(p));
-      const gain = animate ? Math.max(0, st.lastGain[p] || 0) : 0;
-      for (let i = 0; i < Math.min(n, 30); i++) { const z = el("div", "zb" + (i >= n - gain ? " new" : "")); if (i >= n - gain) z.style.animationDelay = (i - (n - gain)) * 0.12 + "s"; pile.appendChild(z); }
-      c.appendChild(pile); c.appendChild(el("div", "floor"));
-      c.appendChild(el("div", "nm", p)); c.appendChild(el("div", "pt", score(p) + "枚"));
-      b.appendChild(c);
-    });
+  function renderPile(from) {
+    const pile = $("pile"); pile.textContent = "";
+    const n = total();
+    for (let i = 0; i < n; i++) { const isNew = from != null && i >= from; const z = el("div", "zb" + (isNew ? " new" : "")); if (isNew) z.style.animationDelay = (i - from) * 0.15 + "s"; pile.appendChild(z); }
+    $("total").textContent = n; $("rank").textContent = rankOf(n);
   }
 
-  function status() {
-    const s = $("status"); s.textContent = "";
-    if (st.phase === "setup" || st.phase === "final") return;
-    s.appendChild(document.createTextNode("第 ")); s.appendChild(el("b", null, String(st.round + 1)));
-    s.appendChild(document.createTextNode(" / " + st.totalRounds + " 問 ｜ 司会 ")); s.appendChild(el("b", null, mc()));
-  }
-
-  // ---------- 画面 ----------
-  function setup() {
-    const f = el("div", "fuda"); f.appendChild(el("span", "label", "準備"));
-    f.appendChild(el("h2", null, "1台のスマホを回して遊ぶ大喜利"));
-    f.appendChild(el("p", "muted", "毎問、司会が交代します。司会以外の人が順番にこっそり回答し、最後に司会が名前を伏せたまま読み上げて座布団を配ります。座布団を一番多く集めた人の優勝です。"));
-    f.lastChild.style.margin = "0";
-    const list = el("div", "players");
-    st.names.forEach((n, i) => {
-      const r = el("div", "prow");
-      const inp = el("input"); inp.type = "text"; inp.id = "p" + i; inp.maxLength = 12; inp.placeholder = "プレイヤー" + (i + 1); inp.value = n;
-      inp.oninput = () => { st.names[i] = inp.value; save(); check(); };
-      r.appendChild(inp);
-      if (st.names.length > 2) { const x = el("button", "x", "×"); x.type = "button"; x.setAttribute("aria-label", "削除"); x.onclick = () => { st.names.splice(i, 1); save(); render(); }; r.appendChild(x); }
-      list.appendChild(r);
-    });
-    f.appendChild(list);
-    const add = btn("+ 参加者を追加", "ghost", () => { st.names.push(""); save(); render(); $("p" + (st.names.length - 1))?.focus(); });
-    add.disabled = st.names.length >= 8;
-    const seg = el("div", "seg"); seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "何周するか");
-    [1, 2].forEach((l) => { const b = el("button", null, l + "周"); b.type = "button"; b.setAttribute("aria-pressed", String(st.laps === l)); b.onclick = () => { st.laps = l; save(); render(); }; seg.appendChild(b); });
-    const r1 = el("div", "row between"); r1.appendChild(add);
-    const lapWrap = el("div", "row"); lapWrap.appendChild(el("span", "muted", "司会を")); lapWrap.appendChild(seg); r1.appendChild(lapWrap);
-    f.appendChild(r1);
-    const msg = el("div", "muted"); const start = btn("はじめる", "shu", begin);
-    const r2 = el("div", "row between"); r2.appendChild(msg); r2.appendChild(start); f.appendChild(r2);
-    function check() {
-      const names = st.names.map((s) => s.trim()).filter(Boolean);
-      const dup = new Set(names).size !== names.length;
-      start.disabled = names.length < 2 || dup;
-      msg.textContent = dup ? "同じ名前があります" : names.length < 2 ? "2人以上の名前を入れてください" : names.length + "人・全" + names.length * st.laps + "問";
-    }
-    check();
+  function renderTry(t, last) {
+    const f = document.createDocumentFragment();
+    f.appendChild(el("div", "mine", t.answer));
+    const g = t.result, j = el("div", "judge");
+    j.appendChild(el("div", "reaction", g.reaction));
+    const v = el("div", "verdict"); v.appendChild(el("span", "stamp", VERDICT[g.zabuton]));
+    const m = el("div", "meters");
+    ["発想", "情景", "意外性"].forEach((k, i) => { const mm = el("span", "meter"); mm.appendChild(el("span", null, k)); const d = el("span", "dots"); for (let n = 1; n <= 5; n++) d.appendChild(el("i", n <= g.scores[i] ? "on" : "")); mm.appendChild(d); m.appendChild(mm); });
+    v.appendChild(m); j.appendChild(v);
+    j.appendChild(el("h3", null, "講評"));
+    const ul = el("ul", "points");
+    g.points.forEach(([k, text]) => { const li = el("li"); li.appendChild(el("b", null, k + ":")); li.appendChild(document.createTextNode(text)); ul.appendChild(li); });
+    j.appendChild(ul);
+    if (last && t.showSample) { j.appendChild(el("div", null, "ちなみに師匠ならこう答える。")); j.appendChild(el("blockquote", null, g.sample)); }
+    f.appendChild(j);
     return f;
   }
 
-  function begin() {
-    const names = st.names.map((s) => s.trim()).filter(Boolean);
-    Object.assign(st, { players: names, round: 0, totalRounds: names.length * st.laps, deck: shuffle(ODAI), history: [], lastGain: {} });
-    newRound();
-  }
-
-  function newRound() {
-    st.odai = nextOdai();
-    const m = mc(); const i = st.players.indexOf(m);
-    st.order = st.players.slice(i + 1).concat(st.players.slice(0, i)); // 司会の次の人から
-    st.ai = 0; st.answers = {}; st.awards = {};
-    go("odai");
-  }
-
-  function odai() {
-    const f = el("div", "fuda"); f.appendChild(el("span", "label", "お題"));
-    f.appendChild(el("div", "muted", "司会:" + mc() + " さん。お題を読み上げてください。"));
-    const h = el("h2", null, st.odai); f.appendChild(h);
-    const edit = el("textarea"); edit.id = "customOdai"; edit.maxLength = 120; edit.placeholder = "自分でお題を書く"; edit.hidden = true; edit.style.minHeight = "72px";
-    f.appendChild(edit);
-    const r = el("div", "row");
-    r.appendChild(btn("別のお題", "ghost", () => { st.odai = nextOdai(); save(); h.textContent = st.odai; }));
-    const own = btn("自分でお題を書く", "ghost", () => { edit.hidden = !edit.hidden; if (!edit.hidden) edit.focus(); });
-    r.appendChild(own);
-    f.appendChild(r);
-    const r2 = el("div", "row end");
-    r2.appendChild(btn("回答スタート", "shu", () => { const c = edit.value.trim(); if (!edit.hidden && c) st.odai = c; go("pass"); }));
-    f.appendChild(r2);
-    return f;
-  }
-
-  function pass() {
-    const who = st.order[st.ai];
-    const f = el("div", "fuda"); f.appendChild(el("span", "label", "回答 " + (st.ai + 1) + "/" + st.order.length));
-    f.appendChild(progress(st.ai, st.order.length));
-    f.appendChild(el("div", "muted", "スマホを渡してください"));
-    f.appendChild(el("div", "big", who + " さん"));
-    f.appendChild(el("p", "muted", "ほかの人に画面が見えないようにしてから押してください。")).style.margin = "0";
-    const r = el("div", "row end"); r.appendChild(btn(who + " です。回答する", "", () => go("answer"))); f.appendChild(r);
-    return f;
-  }
-
-  function answer() {
-    const who = st.order[st.ai];
-    const f = el("div", "fuda"); f.appendChild(el("span", "label", "お題"));
-    f.appendChild(el("h2", null, st.odai));
-    f.appendChild(el("div", "who", who + " さんの回答"));
-    const t = el("textarea"); t.id = "ans"; t.maxLength = 200; t.placeholder = "ここに回答を書く(名前は伏せて読み上げられます)";
-    t.value = st.answers[who] || "";
-    f.appendChild(t);
-    const send = btn("提出して次の人へ", "shu", submit);
-    const r = el("div", "row between");
-    r.appendChild(btn("パスする", "ghost", () => { delete st.answers[who]; advance(); }));
-    r.appendChild(send); f.appendChild(r);
-    const sync = () => { send.disabled = !t.value.trim(); };
-    t.oninput = sync; sync();
-    t.onkeydown = (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submit(); } };
-    function submit() { const v = t.value.trim(); if (!v) return; st.answers[who] = v; advance(); }
-    setTimeout(() => t.focus(), 0);
-    return f;
-  }
-
-  function advance() {
-    st.ai++;
-    if (st.ai < st.order.length) return go("pass");
-    st.judgeOrder = shuffle(Object.keys(st.answers)); st.ji = 0;
-    go(st.judgeOrder.length ? "handMc" : "reveal");
-  }
-
-  function handMc() {
-    const f = el("div", "fuda"); f.appendChild(el("span", "label", "審査"));
-    f.appendChild(el("div", "muted", "全員の回答がそろいました。スマホを司会に渡してください"));
-    f.appendChild(el("div", "big", mc() + " さん"));
-    f.appendChild(el("p", "muted", "回答を名前を伏せて1つずつ表示します。声に出して読み上げて、座布団を配ってください。")).style.margin = "0";
-    const r = el("div", "row end"); r.appendChild(btn("審査をはじめる", "shu", () => go("judge"))); f.appendChild(r);
-    return f;
-  }
-
-  function judge() {
-    const who = st.judgeOrder[st.ji];
-    const f = el("div", "fuda"); f.appendChild(el("span", "label", "回答 " + (st.ji + 1) + "/" + st.judgeOrder.length));
-    f.appendChild(progress(st.ji, st.judgeOrder.length));
-    f.appendChild(el("div", "muted", st.odai));
-    f.appendChild(el("div", "big", st.answers[who]));
-    f.appendChild(el("div", "muted", "座布団は何枚?"));
-    const g = el("div", "award");
-    AWARDS.forEach(([n, label]) => {
-      const b = el("button", n < 0 ? "minus" : ""); b.type = "button";
-      b.appendChild(el("b", null, n > 0 ? "+" + n : n < 0 ? "−1" : "0")); b.appendChild(el("span", null, label));
-      b.onclick = () => { st.awards[who] = n; st.ji++; st.ji < st.judgeOrder.length ? go("judge") : go("reveal"); };
-      g.appendChild(b);
-    });
-    f.appendChild(g);
-    if (st.ji > 0) { const r = el("div", "row"); r.appendChild(btn("ひとつ前に戻る", "ghost", () => { st.ji--; go("judge"); })); f.appendChild(r); }
-    return f;
-  }
-
-  function reveal() {
-    if (!st._committed) {
-      st.history.push({ odai: st.odai, mc: mc(), answers: { ...st.answers }, awards: { ...st.awards } });
-      st.lastGain = { ...st.awards }; st._committed = true; save();
-    }
-    const f = el("div", "fuda"); f.appendChild(el("span", "label", "発表"));
-    f.appendChild(el("h2", null, st.odai));
-    const ul = el("ul", "list");
-    const entries = Object.keys(st.answers).sort((a, b) => (st.awards[b] ?? 0) - (st.awards[a] ?? 0));
-    if (!entries.length) f.appendChild(el("p", "muted", "全員パスでした。"));
-    entries.forEach((p) => {
-      const li = el("li"); const d = el("div");
-      d.appendChild(el("span", "by", p)); d.appendChild(document.createTextNode(st.answers[p]));
-      const n = st.awards[p] ?? 0;
-      li.appendChild(d); li.appendChild(el("span", "n" + (n < 0 ? " neg" : ""), n < 0 ? "没収" : n + "枚"));
-      ul.appendChild(li);
-    });
-    if (entries.length) {
-      const top = entries[0];
-      if ((st.awards[top] ?? 0) > 0 && entries.filter((p) => st.awards[p] === st.awards[top]).length === 1) f.appendChild(el("div", "stamp", "この問の一本:" + top));
-    }
-    f.appendChild(ul);
-    const last = st.round + 1 >= st.totalRounds;
-    const r = el("div", "row end");
-    r.appendChild(btn(last ? "最終結果へ" : "次のお題へ(司会交代)", "shu", () => {
-      st._committed = false; st.lastGain = {};
-      if (last) return go("final");
-      st.round++; newRound();
-    }));
-    f.appendChild(r);
-    return f;
-  }
-
-  function final() {
-    const ranking = st.players.slice().sort((a, b) => score(b) - score(a));
-    const f = el("div", "fuda"); f.appendChild(el("span", "label", "結果"));
-    const top = score(ranking[0]); const winners = ranking.filter((p) => score(p) === top);
-    f.appendChild(el("div", "muted", "優勝"));
-    f.appendChild(el("div", "big", winners.join("・") + " さん"));
-    const ul = el("ul", "list");
-    ranking.forEach((p, i) => {
-      const rank = ranking.findIndex((q) => score(q) === score(p)) + 1;
-      const li = el("li"); li.appendChild(el("div", null, rank + "位 " + p)); li.appendChild(el("span", "n", score(p) + "枚")); ul.appendChild(li);
-    });
-    f.appendChild(ul);
-    let best = null;
-    st.history.forEach((r) => Object.keys(r.answers).forEach((p) => { const n = r.awards[p] ?? 0; if (n > 0 && (!best || n > best.n)) best = { p, n, a: r.answers[p], o: r.odai }; }));
-    if (best) {
-      f.appendChild(el("div", "stamp", "本日の一本"));
-      const q = el("ul", "list"); const li = el("li"); const d = el("div");
-      d.appendChild(el("span", "by", best.p + "(お題:" + best.o + ")")); d.appendChild(document.createTextNode(best.a));
-      li.appendChild(d); li.appendChild(el("span", "n", best.n + "枚")); q.appendChild(li); f.appendChild(q);
-    }
-    const r = el("div", "row between");
-    r.appendChild(btn("メンバーを変える", "ghost", () => { const names = st.players.slice(); st = blank(); st.names = names; go("setup"); }));
-    r.appendChild(btn("同じメンバーでもう一回", "shu", () => { st.names = st.players.slice(); begin(); }));
-    f.appendChild(r);
-    return f;
-  }
-
-  function progress(i, n) { const p = el("div", "progress"); for (let k = 0; k < n; k++) p.appendChild(el("i", k < i ? "on" : "")); return p; }
-
-  const SCREENS = { setup, odai, pass, answer, handMc, judge, reveal, final };
   function render() {
-    const s = $("screen"); s.textContent = ""; $("quitRow").textContent = "";
-    s.appendChild((SCREENS[st.phase] || setup)());
-    status();
-    renderBoard(st.phase === "reveal");
-    if (st.phase !== "setup" && st.phase !== "final") {
-      const quit = btn("ゲームをやめて最初に戻る", "ghost", () => { quit.hidden = true; sure.hidden = false; });
-      const sure = btn("本当にやめる", "ghost", () => { const names = st.players.slice(); st = blank(); st.names = names.length ? names : ["", "", ""]; go("setup"); });
-      sure.hidden = true;
-      const r = el("div", "row end"); r.appendChild(quit); r.appendChild(sure); $("quitRow").appendChild(r);
-    }
+    $("odai").textContent = odai().q;
+    $("qnum").textContent = Math.min(st.q, ROUNDS);
+    const th = $("thread"); th.textContent = "";
+    st.tries.forEach((t, i) => { if (i) th.appendChild(el("hr", "sep")); th.appendChild(renderTry(t, i === st.tries.length - 1)); });
+    const done = st.phase === "done";
+    $("form").hidden = done || st.phase === "judged";
+    $("nav").hidden = done || st.phase !== "judged";
+    $("result").hidden = !done;
+    $("skip").disabled = st.tries.length > 0;
+    $("next").textContent = st.q >= ROUNDS ? "結果を見る" : "次のお題へ";
+    if (done) renderResult();
   }
 
-  function boot(data) { st = (data && data.st) || load() || blank(); render(); }
+  function submit() {
+    const answer = $("ans").value.trim();
+    if (!answer) return;
+    const before = total();
+    const result = judge(answer, odai(), st.tries.map((t) => t.answer));
+    st.tries.push({ answer, zabuton: result.zabuton, result, showSample: st.tries.length >= 1 || result.zabuton < 2 });
+    $("ans").value = ""; st.phase = "judged"; save();
+    render(); renderPile(before);
+    $("thread").lastElementChild?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function nextRound() {
+    st.rounds.push({ q: odai().q, tries: st.tries.map(({ answer, zabuton }) => ({ answer, zabuton })), best: best() });
+    st.tries = [];
+    if (st.q >= ROUNDS) { st.phase = "done"; save(); render(); renderPile(); return; }
+    st.q++; st.cur = drawNext(); st.phase = "answer"; save();
+    render(); renderPile(); window.scrollTo({ top: 0 }); $("ans").focus();
+  }
+
+  function renderResult() {
+    const box = $("result"); box.textContent = "";
+    const n = total();
+    box.appendChild(el("div", "rank", "最終番付"));
+    box.appendChild(el("h2", null, rankOf(n) + "・座布団 " + n + " 枚"));
+    const tbl = el("table");
+    st.rounds.forEach((r, i) => {
+      const b = r.tries.reduce((a, t) => (!a || t.zabuton > a.zabuton ? t : a), null);
+      const tr = el("tr"), td = el("td");
+      td.appendChild(el("span", "q", "第" + (i + 1) + "問 " + r.q));
+      td.appendChild(document.createTextNode(b ? b.answer : "(回答なし)"));
+      tr.appendChild(td); tr.appendChild(el("td", "n", r.best + " 枚")); tbl.appendChild(tr);
+    });
+    box.appendChild(tbl);
+    const again = el("button", "btn", "もう一度挑戦する"); again.type = "button";
+    again.onclick = () => { st = fresh(); save(); render(); renderPile(); window.scrollTo({ top: 0 }); };
+    const row = el("div", "row"); row.appendChild(again); box.appendChild(row);
+  }
+
+  $("form").addEventListener("submit", (e) => { e.preventDefault(); submit(); });
+  $("ans").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submit(); } });
+  $("skip").onclick = () => { st.cur = drawNext(); save(); render(); };
+  $("retry").onclick = () => { st.phase = "answer"; save(); render(); $("ans").focus(); };
+  $("next").onclick = nextRound;
+
+  function boot(data) { st = (data && data.st) || load() || fresh(); render(); renderPile(); }
   window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
 })();
 </script>
