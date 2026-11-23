@@ -109,14 +109,6 @@ blockquote { margin: 0; border-left: 4px solid var(--line); padding: 4px 0 4px 1
 .result td { padding: 8px 4px; border-top: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
 .result td.n { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--zabuton); font-weight: 700; text-align: right; }
 .result .q { color: var(--muted); font-size: 0.8rem; display: block; }
-.rules { border-top: 1px solid var(--line); padding-top: 12px; font-size: 0.9rem; }
-.rules summary { cursor: pointer; color: var(--muted); font-weight: 700; letter-spacing: 0.06em; }
-.rules-body { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-width: 65ch; }
-.rules-body p, .rules-body ul { margin: 0; }
-.rules-body ul { padding-left: 1.3em; }
-.rules h4 { margin: 6px 0 0; font-family: var(--display); font-weight: 400; color: var(--zabuton); }
-.rules .src { color: var(--muted); font-size: 0.82rem; }
-.rules a { color: var(--zabuton); }
 @media (prefers-reduced-motion: reduce) { .zb.new { animation: none; } }
 </style>
 
@@ -145,7 +137,7 @@ blockquote { margin: 0; border-left: 4px solid var(--line); padding: 4px 0 4px 1
     <label for="ans">あなたの回答</label>
     <textarea id="ans" maxlength="200" placeholder="例:毎晩きっちり22時に出て、22時5分には帰っていく"></textarea>
     <div class="row">
-      <span class="hint">師匠が「発想」「情景」「構成」の3つで採点します</span>
+      <span class="hint">師匠が採点して講評します</span>
       <button class="btn" id="send" type="submit">回答する</button>
     </div>
   </form>
@@ -157,36 +149,6 @@ blockquote { margin: 0; border-left: 4px solid var(--line); padding: 4px 0 4px 1
 
   <section class="result" id="result" hidden></section>
 
-  <details class="rules">
-    <summary>採点基準</summary>
-    <div class="rules-body">
-      <p>師匠は AI ではなく、決まったルールで回答の言葉を見て採点します。3つの軸をそれぞれ5段階で付け、合計で座布団の枚数が決まります(7点以上で1枚、10点以上で2枚、13点以上で3枚)。</p>
-      <h4>発想</h4>
-      <ul>
-        <li>そのお題で誰でも最初に思いつく定番ワードを使うと減点。</li>
-        <li>お題の状況とのギャップで加点。楽しい・めでたいお題ならマイナスの出来事、ついてないお題ならプラスに受け取る回答が強い。</li>
-        <li>お題から遠い、生活感のある言葉(確定申告、既読、町内会など)を持ち込むと加点。</li>
-        <li>「世界のあるある」のお題では、ギャップより、その世界で毎回起きそうなことを素直に答えると加点。</li>
-        <li>幽霊や魔王のような非日常のお題に、タクシーや役所のような現実の要素を持ち込む(現実に引き戻す)と加点。</li>
-        <li>同じお題で、前の回答と同じ要素を使い回すと「被り」として減点。</li>
-      </ul>
-      <h4>情景</h4>
-      <ul>
-        <li>あるあるや実体験に根ざした具体性を見ます。数字、場所や時間、セリフ、カタカナの固有の言葉、音の言葉、「いつも」「つい」などのあるある感で加点。</li>
-        <li>12文字以内で短く言い切った回答は、受け手が想像する余白があるとして加点。</li>
-      </ul>
-      <h4>構成</h4>
-      <ul>
-        <li>お題の形式に沿っているか。理由お題は「〜から」、セリフお題は「」や話し言葉、穴埋め・名前のお題は短く。</li>
-        <li>オチになる言葉が回答の後半に来ているか(語順)。</li>
-        <li>短い2文目でもう一言足して押せているか。</li>
-        <li>小さいボケや言葉を重ねている(「〜し、〜も」や3つ以上の列挙)と加点。</li>
-        <li>短く言い切る(省略)と加点。「あのさ」「なんか」「すごく」のような削れる言葉や、長すぎる回答はノイズとして減点。</li>
-      </ul>
-      <p>お題は、状況を少し絞って前振りを効かせ、特別な知識がいらないものにしています。</p>
-      <p class="src">言葉の特徴を見ているだけなので、本当に面白いかどうかまでは判定できません。</p>
-    </div>
-  </details>
 </div>
 
 <script>
