@@ -1,5 +1,10 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="お題に答えると自動で採点して講評し、座布団がもらえる、ひとり用の大喜利5問勝負。">
 <title>大喜利道場</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
@@ -34,6 +39,8 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); -webkit-text-size-adjust: 100%; }
+html, body { margin: 0; }
 body {
   background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.75;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -166,6 +173,9 @@ textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(i
   .rain, .burst { display: none; }
 }
 </style>
+</head>
+<body>
+
 
 <div class="wrap">
   <header class="top">
@@ -502,7 +512,6 @@ textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(i
   function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch {} }
   function load() { try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); return s && typeof s.cur === "number" && ODAI[s.cur] ? s : null; } catch { return null; } }
-  window.claude?.hot?.snapshot?.(() => ({ st }));
 
   const odai = () => ODAI[st.cur];
   const best = () => st.tries.reduce((m, t) => Math.max(m, t.zabuton), 0);
@@ -632,13 +641,15 @@ textarea:focus { border-color: var(--zabuton); box-shadow: 0 0 0 4px color-mix(i
   $("retry").onclick = () => { st.phase = "answer"; save(); render(); $("ans").focus(); };
   $("next").onclick = nextRound;
 
-  function boot(data) {
-    st = (data && data.st) || load();
+  function boot() {
+    st = load();
     if (!st) { st = fresh(); startClock(); save(); }
     if (st.deadline === undefined) startClock();
     render(); renderPile();
     clearInterval(tickId); tickId = setInterval(tick, 250);
   }
-  window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
+  boot();
 })();
 </script>
+</body>
+</html>
