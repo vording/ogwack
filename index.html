@@ -1,0 +1,429 @@
+<title>大喜利道場</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: 寄席の高座。上に座布団の山とスコア、中央にお題札、下に回答と審査員の講評。1カラム、最大 640px */
+:root {
+  --bg: #eef0f5;          /* 楽屋の壁:わずかに藍寄りの灰 */
+  --surface: #ffffff;
+  --ink: #1d1a2b;
+  --muted: #5f5b72;
+  --line: #d7d6e3;
+  --zabuton: #6a3d9a;     /* 座布団の紫 */
+  --zabuton-edge: #4b2775;
+  --tassel: #d4a017;      /* 房の金 */
+  --shu: #c8402f;         /* 朱:札と判定 */
+  --shu-soft: #fbe9e6;
+  --quote: #f3eff9;
+  --display: "Dela Gothic One", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16141f; --surface: #211e2e; --ink: #ece9f5; --muted: #a8a3bd; --line: #3a3550;
+    --zabuton: #9a6fd0; --zabuton-edge: #6d47a3; --tassel: #e6b838; --shu: #ef6a57; --shu-soft: #3a2320; --quote: #2a2540;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16141f; --surface: #211e2e; --ink: #ece9f5; --muted: #a8a3bd; --line: #3a3550;
+  --zabuton: #9a6fd0; --zabuton-edge: #6d47a3; --tassel: #e6b838; --shu: #ef6a57; --shu-soft: #3a2320; --quote: #2a2540;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.75;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+.wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, .display { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible, textarea:focus-visible { outline: 3px solid var(--tassel); outline-offset: 2px; }
+
+/* ヘッダー */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand h1 { font-size: 1.6rem; letter-spacing: 0.04em; }
+.brand small { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.08em; }
+.status { display: flex; gap: 14px; align-items: center; color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.status b { color: var(--ink); font-size: 1.05rem; }
+
+/* 座布団の山 */
+.stage { display: flex; align-items: flex-end; gap: 16px; }
+.pile { display: flex; flex-direction: column-reverse; align-items: center; min-height: 28px; width: 112px; flex-shrink: 0; }
+.zb {
+  width: 104px; height: 16px; border-radius: 7px; margin-top: -3px;
+  background: linear-gradient(var(--zabuton), var(--zabuton-edge));
+  box-shadow: 0 1px 0 rgba(0,0,0,.18); position: relative;
+}
+.zb::before, .zb::after { content: ""; position: absolute; top: 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--tassel); }
+.zb::before { left: -2px; } .zb::after { right: -2px; }
+.zb.new { animation: drop .5s cubic-bezier(.3,1.4,.5,1) both; }
+@keyframes drop { from { transform: translateY(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.floor { width: 112px; height: 4px; border-radius: 2px; background: var(--line); }
+.pilebox { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.rank { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.06em; }
+.rank b { color: var(--zabuton); font-family: var(--display); font-weight: 400; font-size: 1rem; letter-spacing: 0.02em; }
+
+/* お題札 */
+.fuda {
+  flex: 1; min-width: 0; background: var(--surface); border: 2px solid var(--ink); border-radius: 4px;
+  padding: 18px 20px 20px; position: relative;
+}
+.fuda .label {
+  position: absolute; top: -13px; left: 16px; background: var(--shu); color: #fff; font-size: 0.78rem;
+  font-weight: 700; padding: 1px 10px; border-radius: 3px; letter-spacing: 0.12em;
+}
+.fuda h2 { font-size: 1.3rem; line-height: 1.55; }
+.fuda .odai-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+@media (max-width: 520px) {
+  .stage { flex-direction: column-reverse; align-items: stretch; }
+  .pilebox { flex-direction: row; justify-content: center; gap: 14px; }
+  .pile { width: 112px; }
+  .floor { display: none; }
+}
+
+/* ボタン */
+.btn { border: 0; border-radius: 999px; padding: 10px 20px; font-weight: 700; background: var(--zabuton); color: #fff; }
+.btn:hover { filter: brightness(1.08); }
+.btn:disabled { opacity: .5; cursor: default; filter: none; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); font-weight: 500; padding: 7px 14px; font-size: 0.88rem; }
+.btn.ghost:hover { border-color: var(--muted); }
+.btn.shu { background: var(--shu); }
+
+/* 回答 */
+.answer { display: flex; flex-direction: column; gap: 10px; }
+.answer label { font-size: 0.85rem; color: var(--muted); letter-spacing: 0.06em; }
+textarea {
+  width: 100%; min-height: 96px; resize: vertical; border: 1.5px solid var(--line); border-radius: 14px;
+  background: var(--surface); color: var(--ink); padding: 14px 16px; font: inherit; line-height: 1.7;
+}
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
+.hint { font-size: 0.8rem; color: var(--muted); }
+
+/* 講評 */
+.thread { display: flex; flex-direction: column; gap: 18px; }
+.mine { align-self: flex-end; max-width: 85%; background: var(--quote); border-radius: 20px; padding: 12px 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.judge { display: flex; flex-direction: column; gap: 12px; }
+.reaction { font-size: 1.05rem; }
+.verdict { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.stamp {
+  font-family: var(--display); color: var(--shu); border: 2.5px solid var(--shu); border-radius: 6px;
+  padding: 2px 12px; transform: rotate(-4deg); font-size: 1.05rem; background: var(--shu-soft);
+}
+.meters { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.82rem; color: var(--muted); }
+.meter { display: flex; align-items: center; gap: 6px; }
+.dots { display: inline-flex; gap: 3px; }
+.dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.dots i.on { background: var(--zabuton); }
+.judge h3 { font-family: var(--display); font-weight: 400; font-size: 1.05rem; margin: 4px 0 0; }
+.points { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+.points b { margin-right: .3em; }
+blockquote { margin: 0; border-left: 4px solid var(--line); padding: 4px 0 4px 16px; white-space: pre-wrap; }
+.thinking { color: var(--muted); display: flex; align-items: center; gap: 10px; }
+.thinking .fan { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--zabuton); animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.note { font-size: 0.85rem; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; padding: 10px 14px; }
+.self { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.sep { border: 0; border-top: 1px solid var(--line); margin: 4px 0; }
+
+/* 結果 */
+.result { background: var(--surface); border-radius: 18px; padding: 24px 20px; display: flex; flex-direction: column; gap: 14px; border: 1.5px solid var(--line); }
+.result h2 { font-size: 1.6rem; }
+.result table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.result td { padding: 8px 4px; border-top: 1px solid var(--line); vertical-align: top; }
+.result td.n { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--zabuton); font-weight: 700; text-align: right; }
+.result .q { color: var(--muted); font-size: 0.8rem; display: block; }
+@media (prefers-reduced-motion: reduce) { .zb.new, .thinking .fan { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><h1>大喜利道場</h1><small>5問勝負</small></div>
+    <div class="status"><span>第 <b id="qnum">1</b> / 5 問</span><span>座布団 <b id="total">0</b> 枚</span></div>
+  </header>
+
+  <section class="stage">
+    <div class="fuda">
+      <span class="label">お題</span>
+      <h2 id="odai">…</h2>
+      <div class="odai-actions">
+        <button class="btn ghost" id="skip" type="button">別のお題にする</button>
+        <button class="btn ghost" id="aiOdai" type="button" hidden>AIにお題を作ってもらう</button>
+      </div>
+    </div>
+    <div class="pilebox">
+      <div class="pile" id="pile" aria-label="獲得した座布団"></div>
+      <div class="floor"></div>
+      <div class="rank">番付 <b id="rank">見習い</b></div>
+    </div>
+  </section>
+
+  <section class="thread" id="thread" aria-live="polite"></section>
+
+  <form class="answer" id="form">
+    <label for="ans">あなたの回答</label>
+    <textarea id="ans" maxlength="300" placeholder="例:迷子になりそうなときに出てきて道に戻してくれる"></textarea>
+    <div class="row">
+      <span class="hint" id="hint">Ctrl / ⌘ + Enter でも送信できます</span>
+      <button class="btn" id="send" type="submit">回答する</button>
+    </div>
+  </form>
+
+  <div class="row" id="nav" hidden>
+    <button class="btn ghost" id="retry" type="button">同じお題でもう一回</button>
+    <button class="btn shu" id="next" type="button">次のお題へ</button>
+  </div>
+
+  <section class="result" id="result" hidden></section>
+</div>
+
+<script>
+(() => {
+  const ODAI = [
+    "絶対に幽霊が出るのに、全然怖くない心霊スポット。その理由は?",
+    "こんなコンビニは嫌だ。どんなコンビニ?",
+    "宇宙人が地球に来て、最初にがっかりしたことは?",
+    "100年後の運動会で行われている新競技とは?",
+    "「この人、絶対に転職したばかりだな」と思った瞬間とは?",
+    "忍者の履歴書。特技の欄に書いてあったことは?",
+    "全然売れないおみくじ。何が書いてある?",
+    "猫が人間に対して、密かに思っていることは?",
+    "ロボットが初めて「疲れた」と言った。その理由は?",
+    "魔王が勇者に送った、ちょっと気まずいメールの内容は?",
+    "世界一やる気のないカーナビ。何と言った?",
+    "雪だるまが春に向けて準備していることは?",
+    "新しくできた祝日「○○の日」。何をする日?",
+    "天気予報士がつい本音を言ってしまった。何と言った?",
+    "冷蔵庫が家族会議に参加。どんな意見を言った?",
+    "校長先生の話が今日だけ短かった。その理由は?",
+    "「このラーメン屋、こだわりが強すぎる」どんなこだわり?",
+    "タイムマシンができたのに誰も使わない。その理由は?",
+    "異世界に転生したのに全然チートじゃなかった。どんな能力?",
+    "名探偵が犯人を見つけたのに言い出せない。その理由は?",
+    "自動販売機が売り切れランプでこっそり伝えたいことは?",
+    "ペンギンが空を飛べない本当の理由は?",
+    "引っ越し業者が思わず二度見した荷物とは?",
+    "図書館の「静かに」の貼り紙。よく見たら何て書いてある?",
+    "RPGの村人Aが、実は毎日悩んでいることは?",
+    "「この美術館、何かおかしい」どこがおかしい?"
+  ];
+  const ROUNDS = 5;
+  const RANKS = [[14,"名人"],[11,"真打"],[8,"二ツ目"],[4,"前座"],[0,"見習い"]];
+  const VERDICT = ["座布団なし", "座布団1枚", "座布団2枚", "座布団3枚!"];
+  const $ = (id) => document.getElementById(id);
+
+  let sample = null;
+  let ctl = null;
+  let st;
+
+  const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const fresh = () => ({ deck: shuffle(ODAI), q: 1, odai: "", tries: [], rounds: [], phase: "answer" });
+
+  function boot(data) {
+    st = data && data.st ? data.st : fresh();
+    if (!st.odai) st.odai = st.deck.shift() || ODAI[0];
+    render(true);
+  }
+  window.claude?.hot?.snapshot?.(() => ({ st }));
+
+  const total = () => st.rounds.reduce((s, r) => s + r.best, 0) + (st.phase === "judged" ? 0 : 0);
+  const currentBest = () => st.tries.reduce((m, t) => Math.max(m, t.zabuton ?? 0), 0);
+  const rankOf = (n) => RANKS.find(([min]) => n >= min)[1];
+
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  function renderPile(animateFrom) {
+    const pile = $("pile"); pile.textContent = "";
+    const n = total() + currentBest();
+    for (let i = 0; i < n; i++) { const z = el("div", "zb" + (animateFrom != null && i >= animateFrom ? " new" : "")); if (animateFrom != null && i >= animateFrom) z.style.animationDelay = (i - animateFrom) * 0.15 + "s"; pile.appendChild(z); }
+    $("total").textContent = n;
+    $("rank").textContent = rankOf(n);
+  }
+
+  function renderTry(t) {
+    const frag = document.createDocumentFragment();
+    frag.appendChild(el("div", "mine", t.answer));
+    const j = el("div", "judge");
+    if (t.pending) {
+      const th = el("div", "thinking"); th.appendChild(el("span", "fan")); th.appendChild(el("span", null, "審査員が考えています…"));
+      j.appendChild(th);
+    } else if (t.error) {
+      j.appendChild(el("div", "note", t.error));
+    } else if (t.self) {
+      j.appendChild(el("div", "reaction", "自己採点:" + VERDICT[t.zabuton]));
+    } else if (t.judge) {
+      const g = t.judge;
+      j.appendChild(el("div", "reaction", g.reaction));
+      const v = el("div", "verdict");
+      v.appendChild(el("span", "stamp", VERDICT[t.zabuton]));
+      const m = el("div", "meters");
+      [["発想", g.scores?.hassou], ["情景", g.scores?.jokei], ["意外性", g.scores?.igai]].forEach(([k, s]) => {
+        const mm = el("span", "meter"); mm.appendChild(el("span", null, k));
+        const d = el("span", "dots"); for (let i = 1; i <= 5; i++) d.appendChild(el("i", i <= (s || 0) ? "on" : ""));
+        mm.appendChild(d); m.appendChild(mm);
+      });
+      v.appendChild(m); j.appendChild(v);
+      if (Array.isArray(g.points) && g.points.length) {
+        j.appendChild(el("h3", null, "講評"));
+        const ul = el("ul", "points");
+        g.points.forEach((p) => { const li = el("li"); li.appendChild(el("b", null, (p.label || "") + ":")); li.appendChild(document.createTextNode(p.text || "")); ul.appendChild(li); });
+        j.appendChild(ul);
+      }
+      if (g.example) {
+        j.appendChild(el("div", null, "たとえば、"));
+        j.appendChild(el("blockquote", null, g.example));
+        if (g.exampleNote) j.appendChild(el("div", null, g.exampleNote));
+      }
+    }
+    frag.appendChild(j);
+    return frag;
+  }
+
+  function render(first) {
+    $("odai").textContent = st.odai;
+    $("qnum").textContent = Math.min(st.q, ROUNDS);
+    const th = $("thread"); th.textContent = "";
+    st.tries.forEach((t, i) => { if (i) th.appendChild(el("hr", "sep")); th.appendChild(renderTry(t)); });
+    const last = st.tries[st.tries.length - 1];
+    const pending = !!last?.pending;
+    const needSelf = last && last.selfPending;
+    if (needSelf) th.appendChild(selfPanel());
+    const done = st.phase === "done";
+    $("form").hidden = done || st.phase === "judged";
+    $("nav").hidden = done || st.phase !== "judged";
+    $("result").hidden = !done;
+    $("send").disabled = pending;
+    $("skip").disabled = pending || st.tries.length > 0;
+    $("aiOdai").disabled = pending || st.tries.length > 0;
+    $("next").textContent = st.q >= ROUNDS ? "結果を見る" : "次のお題へ";
+    if (done) renderResult();
+    if (first) renderPile();
+  }
+
+  function selfPanel() {
+    const box = el("div", "note");
+    box.appendChild(el("div", null, "AI講評は Claude 上でこのページを開いて許可すると使えます。いまは自己採点で進めましょう。"));
+    const row = el("div", "self");
+    VERDICT.forEach((label, n) => {
+      const b = el("button", "btn ghost", label); b.type = "button";
+      b.onclick = () => { const t = st.tries[st.tries.length - 1]; const before = total() + currentBest(); t.selfPending = false; t.self = true; t.zabuton = n; st.phase = "judged"; render(); renderPile(before); };
+      row.appendChild(b);
+    });
+    box.appendChild(row);
+    return box;
+  }
+
+  function buildPrompt(odai, answer, prev) {
+    return [
+      "あなたは大喜利の審査員です。笑いのツボが分かっている気さくな先輩芸人のように、タメ口で明るく講評してください(「笑」を使ってもOK)。",
+      "回答者のセンスを認めつつ、具体的で役に立つ改善点を出してください。説教くさくしないこと。",
+      "",
+      "お題:" + odai,
+      "回答:" + answer,
+      prev.length ? "(同じお題でのこの人の過去の回答:" + prev.join(" / ") + ")" : "",
+      "",
+      "次のキーを持つJSONオブジェクトだけを返してください。前後に文章やコードフェンスを付けないこと。",
+      '{"reaction":"最初のひとこと。1〜2文で、回答のどこが面白いかを一言で言い表す(例:あー、いいねこれ!笑 幽霊の役割が完全に地域ボランティアになってる。)",',
+      ' "scores":{"hassou":1〜5の整数,"jokei":1〜5の整数,"igai":1〜5の整数},',
+      ' "zabuton":0〜3の整数(0=お題に答えていない・滑った、1=まずまず、2=いい、3=爆笑),',
+      ' "points":[{"label":"発想","text":"…"},{"label":"情景","text":"どんな画が浮かぶか"},{"label":"改善ポイント","text":"…"}],',
+      ' "example":"元の回答を土台にした改良版の一例(1〜2文)",',
+      ' "exampleNote":"改良版で何が良くなるかを一言(例:みたいな、幽霊側の奇妙さを加える方向もある。)"}',
+      "採点は甘すぎず辛すぎず。3枚は本当に面白いときだけ。"
+    ].filter((s) => s !== null).join("\n");
+  }
+
+  async function submit() {
+    const answer = $("ans").value.trim();
+    if (!answer || st.tries.some((t) => t.pending)) return;
+    if (!resolved) { $("send").disabled = true; $("hint").textContent = "審査員を呼んでいます…"; await ready; $("send").disabled = false; }
+    const prev = st.tries.map((t) => t.answer);
+    const t = { answer, pending: !!sample };
+    st.tries.push(t);
+    $("ans").value = "";
+    if (!sample) { t.selfPending = true; render(); return; }
+    render();
+    $("thread").lastElementChild?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    ctl = new AbortController();
+    try {
+      const g = await sample.json(buildPrompt(st.odai, answer, prev), { signal: ctl.signal, cache: false });
+      const before = total() + currentBest();
+      t.pending = false;
+      t.judge = g;
+      t.zabuton = Math.max(0, Math.min(3, Math.round(Number(g.zabuton) || 0)));
+      st.phase = "judged";
+      render(); renderPile(before);
+    } catch (e) {
+      t.pending = false;
+      if (e && e.code === "not_granted") { sample = null; $("aiOdai").hidden = true; t.selfPending = true; }
+      else if (e && e.code === "rate_limited") { t.error = "審査員がひと休み中です。少し待ってから「同じお題でもう一回」で送り直してください。"; st.phase = "judged"; }
+      else { t.error = "講評を受け取れませんでした。「同じお題でもう一回」で送り直してください。"; st.phase = "judged"; }
+      render();
+    }
+  }
+
+  function nextRound() {
+    st.rounds.push({ odai: st.odai, tries: st.tries.map(({ answer, zabuton }) => ({ answer, zabuton: zabuton ?? 0 })), best: currentBest() });
+    st.tries = [];
+    if (st.q >= ROUNDS) { st.phase = "done"; render(); renderPile(); return; }
+    st.q++;
+    if (!st.deck.length) st.deck = shuffle(ODAI);
+    st.odai = st.deck.shift();
+    st.phase = "answer";
+    render(); renderPile();
+    $("ans").focus();
+  }
+
+  function renderResult() {
+    const box = $("result"); box.textContent = "";
+    const n = total();
+    box.appendChild(el("div", "rank", "最終番付"));
+    box.appendChild(el("h2", null, rankOf(n) + "・座布団 " + n + " 枚"));
+    const tbl = el("table");
+    st.rounds.forEach((r, i) => {
+      const best = r.tries.reduce((a, b) => ((b.zabuton ?? 0) > (a?.zabuton ?? -1) ? b : a), null);
+      const tr = el("tr"); const td = el("td");
+      td.appendChild(el("span", "q", "第" + (i + 1) + "問 " + r.odai));
+      td.appendChild(document.createTextNode(best ? best.answer : "(回答なし)"));
+      tr.appendChild(td); tr.appendChild(el("td", "n", r.best + " 枚")); tbl.appendChild(tr);
+    });
+    box.appendChild(tbl);
+    const again = el("button", "btn", "もう一度挑戦する"); again.type = "button";
+    again.onclick = () => { st = fresh(); st.odai = st.deck.shift(); render(); renderPile(); };
+    const row = el("div", "row"); row.appendChild(again); box.appendChild(row);
+  }
+
+  async function aiOdai() {
+    if (!sample) return;
+    const b = $("aiOdai"); b.disabled = true; b.textContent = "考え中…";
+    try {
+      const g = await sample.json('大喜利のお題を1つ作ってください。誰でも答えやすく、ひねった回答が出やすいもの。既存の有名番組のお題の丸写しは避けること。JSONだけで返す:{"odai":"お題の文"}', { modelTier: "quick", cache: false });
+      if (g && typeof g.odai === "string" && g.odai.trim()) { st.odai = g.odai.trim().slice(0, 120); render(); }
+    } catch (e) {
+      if (e && e.code === "not_granted") { sample = null; b.hidden = true; }
+    } finally { b.disabled = false; b.textContent = "AIにお題を作ってもらう"; }
+  }
+
+  $("form").addEventListener("submit", (e) => { e.preventDefault(); submit(); });
+  $("ans").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submit(); } });
+  $("skip").onclick = () => { if (!st.deck.length) st.deck = shuffle(ODAI); st.odai = st.deck.shift(); render(); };
+  $("aiOdai").onclick = aiOdai;
+  $("retry").onclick = () => { st.phase = "answer"; render(); $("ans").focus(); };
+  $("next").onclick = nextRound;
+
+  window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
+
+  const ready = (async () => {
+    try { sample = window.claude?.use ? await window.claude.use("sample") : null; } catch { sample = null; }
+    if (sample) { $("aiOdai").hidden = false; $("hint").textContent = "審査員 Claude が講評します(Ctrl / ⌘ + Enter で送信)"; }
+    else { $("hint").textContent = "このページでは自己採点モードで遊べます"; }
+  })();
+  let resolved = false; ready.then(() => { resolved = true; });
+})();
+</script>
